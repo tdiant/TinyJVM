@@ -1,8 +1,11 @@
 package net.tdiant.tinyjvm.classes.file;
 
+import net.tdiant.tinyjvm.classes.file.constant.*;
 import net.tdiant.tinyjvm.classes.instruction.*;
-import net.tdiant.tinyjvm.code.instruction.*;
+import net.tdiant.tinyjvm.exception.InstructionReaderException;
+import net.tdiant.tinyjvm.util.StreamUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,17 +13,16 @@ import java.util.Map;
 
 public class InstructionReader {
 
-    private int op;
-    private DataInputStream s;
-    private ConstantPool pool;
+    private final int op;
+    private final DataInputStream s;
+    private final ByteArrayInputStream ba;
+    private final ConstantPool pool;
 
-
-    public InstructionReader(int op, DataInputStream s, ConstantPool pool) throws IOException {
-
+    public InstructionReader(int op, ByteArrayInputStream ba, DataInputStream s, ConstantPool pool) {
         this.op = op;
         this.s = s;
+        this.ba = ba;
         this.pool = pool;
-
     }
 
     public Instruction read() throws IOException {
@@ -62,11 +64,11 @@ public class InstructionReader {
             case 0x11:
                 return new SiPushInstruction(s.readShort());
             case 0x12:
-                //todo 0x12
+                return readLdc();
             case 0x13:
-                //todo 0x13
+                return readLdcW();
             case 0x14:
-                //todo 0x14
+                return readLdc2W();
             case 0x15:
                 return new ILoadInstruction(s.readUnsignedByte());
             case 0x16:
@@ -118,21 +120,21 @@ public class InstructionReader {
             case 0x2d:
                 return new ALoadInstruction(3);
             case 0x2e:
-                return new IALoadInstruction();//todo array support
+                return new IALoadInstruction();
             case 0x2f:
-                return new LALoadInstruction();//todo array support
+                return new LALoadInstruction();
             case 0x30:
-                return new FALoadInstruction();//todo array support
+                return new FALoadInstruction();
             case 0x31:
-                return new DALoadInstruction();//todo array support
+                return new DALoadInstruction();
             case 0x32:
-                return new AALoadInstruction();//todo array support
+                return new AALoadInstruction();
             case 0x33:
-                return new BALoadInstruction();//todo array support
+                return new BALoadInstruction();
             case 0x34:
-                return new CALoadInstruction();//todo array support
+                return new CALoadInstruction();
             case 0x35:
-                return new SALoadIsntruction();//todo array support
+                return new SALoadInstruction();
             case 0x36:
                 return new IStoreInstruction(s.readUnsignedShort());
             case 0x37:
@@ -184,21 +186,21 @@ public class InstructionReader {
             case 0x4e:
                 return new AStoreInstruction(3);
             case 0x4f:
-                return new IAStoreInstruction();//todo array support
+                return new IAStoreInstruction();
             case 0x50:
-                return new LAStoreInstruction();//todo array support
+                return new LAStoreInstruction();
             case 0x51:
-                return new FAStoreInstruction();//todo array support
+                return new FAStoreInstruction();
             case 0x52:
-                return new DAStoreInstruction();//todo array support
+                return new DAStoreInstruction();
             case 0x53:
-                return new AAStoreInstruction();//todo array support
+                return new AAStoreInstruction();
             case 0x54:
-                return new BAStoreInstruction();//todo array support
+                return new BAStoreInstruction();
             case 0x55:
-                return new CAStoreInstruction();//todo array support
+                return new CAStoreInstruction();
             case 0x56:
-                return new SAStoreInstruction();//todo array support
+                return new SAStoreInstruction();
             case 0x57:
                 return new PopInstruction();
             case 0x58:
@@ -345,7 +347,6 @@ public class InstructionReader {
                 return new IfLeInstruction(s.readShort());
             case 0x9f:
                 return new IfICmpEqInstruction(s.readShort());
-
             case 0xa0:
                 return new IfICmpNeInstruction(s.readShort());
             case 0xa1:
@@ -365,24 +366,87 @@ public class InstructionReader {
             case 0xaa:
                 return readTableSwitch();
             case 0xab:
-                //todo 0xab
+                return readLookupSwitch();
             case 0xac:
+            case 0xae:
+            case 0xb0:
                 return new IReturnInstruction();
             case 0xad:
-                return new LReturnInstruction();
-            case 0xae:
-                return new FReturnInstruction();
             case 0xaf:
-                return new DReturnInstruction();
-            case 0xb0:
-                return new AReturnInstruction();
+                return new LReturnInstruction();
             case 0xb1:
-                return new ReturnINstruction();
+                return new ReturnInstruction();
             case 0xb2:
-
+                return readGetterAndPutter(0);
+            case 0xb3:
+                return readGetterAndPutter(1);
+            case 0xb4:
+                return readGetterAndPutter(2);
+            case 0xb5:
+                return readGetterAndPutter(3);
+            case 0xb6:
+                return readGetterAndPutter(4);
+            case 0xb7:
+                return readGetterAndPutter(5);
+            case 0xb8:
+                return readGetterAndPutter(6);
+            case 0xb9:
+                return readGetterAndPutter(7);
+            case 0xba:
+                return readInvokeDynamic();
+            case 0xbb:
+                return new NewInstruction(pool.getClassName(s.readUnsignedShort()));
+            case 0xbc:
+                return new NewArrayInstruction(s.readUnsignedByte());
+            case 0xbd:
+                return new ANewArrayInstruction(pool.getClassName(s.readUnsignedShort()));
+            case 0xbe:
+                return new ArrayLengthInstruction();
+            case 0xbf:
+                return new AThrowInstruction();
+            case 0xc0:
+                return new CheckcastInstruction(pool.getClassName(s.readUnsignedShort()));
+            case 0xc1:
+                return new InstanceOfInstruction(pool.getClassName(s.readUnsignedShort()));
+            case 0xc4:
+                switch (s.readUnsignedByte()) {
+                    case 0x15:
+                        return new WideInstruction(4, new ILoadInstruction(s.readUnsignedShort()));
+                    case 0x17:
+                        return new WideInstruction(4, new FLoadInstruction(s.readUnsignedShort()));
+                    case 0x19:
+                        return new WideInstruction(4, new ALoadInstruction(s.readUnsignedShort()));
+                    case 0x16:
+                        return new WideInstruction(4, new LLoadInstruction(s.readUnsignedShort()));
+                    case 0x18:
+                        return new WideInstruction(4, new DLoadInstruction(s.readUnsignedShort()));
+                    case 0x36:
+                        return new WideInstruction(4, new IStoreInstruction(s.readUnsignedShort()));
+                    case 0x38:
+                        return new WideInstruction(4, new FStoreInstruction(s.readUnsignedShort()));
+                    case 0x3a:
+                        return new WideInstruction(4, new AStoreInstruction(s.readUnsignedShort()));
+                    case 0x37:
+                        return new WideInstruction(4, new LStoreInstruction(s.readUnsignedShort()));
+                    case 0x39:
+                        return new WideInstruction(4, new DStoreInstruction(s.readUnsignedShort()));
+                    case 0x84:
+                        return new WideInstruction(4, new IIncInstruction(s.readUnsignedShort(), s.readUnsignedShort()));
+                }
+            case 0xc5:
+                return new MultiANewArrayInst(s.readUnsignedShort(), s.readUnsignedByte());
+            case 0xc6:
+                return new IfNullInstruction(s.readShort());
+            case 0xc7:
+                return new IfNonNullInstruction(s.readShort());
+            case 0xc8:
+                return new GotoWInstruction(s.readInt());
 
             case 0xa8:
             case 0xa9:
+            case 0xc2:
+            case 0xc3:
+            case 0xc9:
             default:
                 throw new UnsupportedOperationException("" + op);
 
@@ -403,4 +467,182 @@ public class InstructionReader {
         );
     }
 
+    private LdcInstruction readLdc() throws IOException {
+        int idx = s.readUnsignedByte();
+        ConstantInfo info = pool.get(idx - 1);
+        switch (info.getTag()) {
+            case ClassFile.CONSTANT_STRING:
+                int strIdx = ((StringConstantInfo) info).getStringIndex();
+                String str = ((Utf8ConstantInfo) pool.get(strIdx - 1)).str();
+                return new LdcInstruction("Ljava/lang/String", str);
+            case ClassFile.CONSTANT_INTEGER:
+                return new LdcInstruction("I", ((IntegerConstantInfo) info).val());
+            case ClassFile.CONSTANT_FLOAT:
+                return new LdcInstruction("F", ((FloatConstantInfo) info).val());
+            default:
+                throw new InstructionReaderException();
+        }
+    }
+
+    private LdcWInstruction readLdcW() throws IOException {
+        int idx = s.readUnsignedShort();
+        ConstantInfo info = pool.get(idx - 1);
+        switch (info.getTag()) {
+            case ClassFile.CONSTANT_STRING:
+                int strIdx = ((StringConstantInfo) info).getStringIndex();
+                String str = ((Utf8ConstantInfo) pool.get(strIdx - 1)).str();
+                return new LdcWInstruction("Ljava/lang/String", str);
+            case ClassFile.CONSTANT_INTEGER:
+                return new LdcWInstruction("I", ((IntegerConstantInfo) info).val());
+            case ClassFile.CONSTANT_FLOAT:
+                return new LdcWInstruction("F", ((FloatConstantInfo) info).val());
+            case ClassFile.CONSTANT_CLASS:
+                return new LdcWInstruction("L", info);
+            default:
+                throw new InstructionReaderException();
+        }
+    }
+
+    private Ldc2WInstruction readLdc2W() throws IOException {
+        int idx = s.readUnsignedShort();
+        ConstantInfo info = pool.get(idx - 1);
+        switch (info.getTag()) {
+            case ClassFile.CONSTANT_DOUBLE:
+                return new Ldc2WInstruction(((DoubleConstantInfo) info).val());
+            case ClassFile.CONSTANT_LONG:
+                return new Ldc2WInstruction(((LongConstantInfo) info).val());
+            default:
+                throw new InstructionReaderException();
+        }
+    }
+
+    private LookupSwitchInstruction readLookupSwitch() throws IOException {
+        int lsOffset = 1;
+        int lsPadding = StreamUtils.readPadding(ba);
+        lsOffset += lsPadding;
+
+        int lsDef = s.readInt();
+        lsOffset += 4;
+        int lsPairsCnt = s.readInt();
+        lsOffset += 4;
+
+        int lsPairsLen = lsPairsCnt * 2 * 4;
+        Map<Integer, Integer> lsMap = new HashMap<>();
+        for (int i = 0; i < lsPairsCnt; i++) {
+            lsMap.put(s.readInt(), s.readInt());
+        }
+
+        lsOffset += lsPairsLen;
+        return new LookupSwitchInstruction(lsOffset, lsDef, lsPairsCnt, lsMap);
+    }
+
+    private Instruction readGetterAndPutter(int i) throws IOException {
+        int idx = s.readUnsignedShort();
+        ClassNameDescriptionUnion union = ClassNameDescriptionUnion.of(idx, pool);
+        switch (i) {
+            case 0:
+                return new GetStaticInstruction(
+                        union.className,
+                        union.name,
+                        union.descriptor
+                );
+            case 1:
+                return new PutStaticInstruction(
+                        union.className,
+                        union.name,
+                        union.descriptor
+                );
+            case 2:
+                return new GetFieldInstruction(
+                        union.className,
+                        union.name,
+                        union.descriptor
+                );
+            case 3:
+                return new PutFieldInstruction(
+                        union.className,
+                        union.name,
+                        union.descriptor
+                );
+            case 4:
+                return new InvokeVirtualInstruction(
+                        union.className,
+                        union.name,
+                        union.descriptor
+                );
+            case 5:
+                return new InvokeSpecialInstruction(
+                        union.className,
+                        union.name,
+                        union.descriptor
+                );
+            case 6:
+                return new InvokeStaticInstruction(
+                        union.className,
+                        union.name,
+                        union.descriptor
+                );
+            case 7:
+                return new InvokeInterfaceInstruction(
+                        union.className,
+                        union.name,
+                        union.descriptor
+                );
+            default:
+                return null;
+        }
+    }
+
+    private static class ClassNameDescriptionUnion {
+        public final String className;
+        public final String name;
+        public final String descriptor;
+
+        public ClassNameDescriptionUnion(String className, String name, String descriptor) {
+            this.className = className;
+            this.name = name;
+            this.descriptor = descriptor;
+        }
+
+        public static ClassNameDescriptionUnion of(int idx, ConstantPool pool) {
+            FieldConstantInfo info = ((FieldConstantInfo) pool.get(idx - 1));
+            NameAndTypeConstantInfo nameAndTypeConstantInfo = ((NameAndTypeConstantInfo) pool.get(info.getNameAndTypeIndex()));
+
+            String className = ((Utf8ConstantInfo) pool.get(info.getClassIndex() - 1)).str();
+            String name = ((Utf8ConstantInfo) pool.get(nameAndTypeConstantInfo.getNameIndex() - 1)).str();
+            String descriptor = ((Utf8ConstantInfo) pool.get(nameAndTypeConstantInfo.getDescriptorIndex() - 1)).str();
+
+            return new ClassNameDescriptionUnion(className, name, descriptor);
+        }
+
+    }
+
+    public InvokeDynamicInstruction readInvokeDynamic() throws IOException {
+        int idx = s.readUnsignedShort();
+        InvokeDynamicConstantInfo info = (InvokeDynamicConstantInfo) pool.get(idx - 1);
+
+        NameAndTypeConstantInfo nameAndType = (NameAndTypeConstantInfo) pool.get(info.getNameAndTypeIndex());
+
+        return new InvokeDynamicInstruction(
+                pool.getString(nameAndType.getNameIndex()),
+                pool.getString(nameAndType.getDescriptorIndex()),
+                info.getBootstrapMethodAttrIndex()
+        );
+    }
+
+    public int getOperation() {
+        return op;
+    }
+
+    public DataInputStream getDataInputStream() {
+        return s;
+    }
+
+    public ByteArrayInputStream getByteArrayInputStream() {
+        return ba;
+    }
+
+    public ConstantPool getConstantPool() {
+        return pool;
+    }
 }

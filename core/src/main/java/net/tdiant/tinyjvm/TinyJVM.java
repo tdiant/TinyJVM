@@ -4,26 +4,18 @@ public class TinyJVM {
 
     public static final VMMain vm = new VMMain();
 
+    private static TinyArguments args;
+
     public static void main(String[] args) {
 
-        if (args.length != 0) {
-            processArgs(args);
-        } else {
-            processArgs(new String[]{"help"});
-        }
+        TinyJVM.args = new TinyArguments(args);
 
         vm.run();
 
     }
 
-    private static void processArgs(String[] args) {
-        switch (args[0]) {
-            default:
-            case "help":
-
-            case "version":
-
-        }
+    public static TinyArguments getArguments() {
+        return args;
     }
 
 }

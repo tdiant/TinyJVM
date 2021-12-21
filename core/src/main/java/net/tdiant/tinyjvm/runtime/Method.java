@@ -1,6 +1,6 @@
 package net.tdiant.tinyjvm.runtime;
 
-import net.tdiant.tinyjvm.classes.file.Exception;
+import net.tdiant.tinyjvm.classes.file.ExceptionInfo;
 import net.tdiant.tinyjvm.classes.file.attr.LineNumTableAttribute;
 import net.tdiant.tinyjvm.classes.instruction.Instruction;
 
@@ -12,15 +12,15 @@ public class Method extends BaseNametag {
     private int maxStacks;
     private int maxLocals;
     private Map<Integer, Instruction> instructions;
-    private List<Exception> exceptions;
+    private List<ExceptionInfo> exceptionInfos;
     private LineNumTableAttribute lineNumAttr;
 
-    public Method(int accessFlags, String name, String descriptor, int maxStacks, int maxLocals, Map<Integer, Instruction> instructions, List<Exception> exceptions, LineNumTableAttribute lineNumAttr) {
+    public Method(int accessFlags, String name, String descriptor, int maxStacks, int maxLocals, Map<Integer, Instruction> instructions, List<ExceptionInfo> exceptionInfos, LineNumTableAttribute lineNumAttr) {
         super(accessFlags, name, descriptor);
         this.maxStacks = maxStacks;
         this.maxLocals = maxLocals;
         this.instructions = instructions;
-        this.exceptions = exceptions;
+        this.exceptionInfos = exceptionInfos;
         this.lineNumAttr = lineNumAttr;
     }
 
@@ -48,12 +48,12 @@ public class Method extends BaseNametag {
         this.instructions = instructions;
     }
 
-    public List<Exception> getExceptions() {
-        return exceptions;
+    public List<ExceptionInfo> getExceptions() {
+        return exceptionInfos;
     }
 
-    public void setExceptions(List<Exception> exceptions) {
-        this.exceptions = exceptions;
+    public void setExceptions(List<ExceptionInfo> exceptionInfos) {
+        this.exceptionInfos = exceptionInfos;
     }
 
     public LineNumTableAttribute getLineNumAttr() {

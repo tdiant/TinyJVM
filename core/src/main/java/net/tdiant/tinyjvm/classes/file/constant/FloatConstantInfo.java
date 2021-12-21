@@ -21,4 +21,8 @@ public class FloatConstantInfo extends ConstantInfo {
     public void setBytes(float bytes) {
         this.bytes = bytes;
     }
+
+    public float val() {
+        return bytes;
+    }
 }

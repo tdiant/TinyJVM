@@ -22,4 +22,8 @@ public class DoubleConstantInfo extends ConstantInfo {
     public void setBytes(double bytes) {
         this.bytes = bytes;
     }
+
+    public double val(){
+        return bytes;
+    }
 }

@@ -37,14 +37,14 @@ public class ClassFileReader {
         int majorVer = in.readUnsignedShort(); // 主版本号
 
         int constantPoolSize = in.readUnsignedShort(); // 常量池大小
-        ConstantPool constantPool = readConstantPool(constantPoolSize); // 常量池
+        ConstantPool constantPool = readConstantPool(constantPoolSize - 1); // 常量池
 
         int accessFlag = in.readUnsignedShort(); // 类访问标志
         int thisClass = in.readUnsignedShort(); // 类索引, 存储当前类名或当前接口名
         int superClass = in.readUnsignedShort(); // 父类索引, 存储父类名
 
         int interfaceCnt = in.readUnsignedShort(); // 接口数量
-        List<Interface> interfaces = readInterfaces(interfaceCnt, constantPool); // 接口对象列表
+        List<InterfaceInfo> interfaceInfos = readInterfaces(interfaceCnt, constantPool); // 接口对象列表
 
         int fieldCnt = in.readUnsignedShort(); // 类字段数量
         List<FieldInfo> fields = readFields(fieldCnt, constantPool); // 类字段列表
@@ -65,7 +65,7 @@ public class ClassFileReader {
                 thisClass,
                 superClass,
                 interfaceCnt,
-                interfaces,
+                interfaceInfos,
                 fieldCnt,
                 fields,
                 methodCnt,
@@ -85,46 +85,46 @@ public class ClassFileReader {
             ConstantInfo con = null;
 
             switch (tag) {
-                case ConstantInfo.CONSTANT_TAG_CLASS:
+                case ClassFile.CONSTANT_CLASS:
                     con = new ClassConstantInfo(tag, in.readUnsignedShort());
                     break;
-                case ConstantInfo.CONSTANT_TAG_FIELD:
+                case ClassFile.CONSTANT_FIELD_REF:
                     con = new FieldConstantInfo(tag, in.readUnsignedShort(), in.readUnsignedShort());
                     break;
-                case ConstantInfo.CONSTANT_TAG_METHOD:
+                case ClassFile.CONSTANT_METHOD_REF:
                     con = new MethodConstantInfo(tag, in.readUnsignedShort(), in.readUnsignedShort());
                     break;
-                case ConstantInfo.CONSTANT_TAG_INTERFACE_METHOD:
+                case ClassFile.CONSTANT_INTERFACE_METHOD_REF:
                     con = new InterfaceMethodConstantInfo(tag, in.readUnsignedShort(), in.readUnsignedShort());
                     break;
-                case ConstantInfo.CONSTANT_TAG_STRING:
+                case ClassFile.CONSTANT_STRING:
                     con = new StringConstantInfo(tag, in.readUnsignedShort());
                     break;
-                case ConstantInfo.CONSTANT_TAG_INTEGER:
+                case ClassFile.CONSTANT_INTEGER:
                     con = new IntegerConstantInfo(tag, in.readInt());
                     break;
-                case ConstantInfo.CONSTANT_TAG_FLOAT:
+                case ClassFile.CONSTANT_FLOAT:
                     con = new FloatConstantInfo(tag, in.readFloat());
                     break;
-                case ConstantInfo.CONSTANT_TAG_LONG:
+                case ClassFile.CONSTANT_LONG:
                     con = new LongConstantInfo(tag, in.readLong());
                     break;
-                case ConstantInfo.CONSTANT_TAG_DOUBLE:
+                case ClassFile.CONSTANT_DOUBLE:
                     con = new DoubleConstantInfo(tag, in.readDouble());
                     break;
-                case ConstantInfo.CONSTANT_TAG_NAME_AND_TYPE:
+                case ClassFile.CONSTANT_NAME_AND_TAG:
                     con = new NameAndTypeConstantInfo(tag, in.readUnsignedShort(), in.readUnsignedShort());
                     break;
-                case ConstantInfo.CONSTANT_TAG_UTF8:
+                case ClassFile.CONSTANT_UTF8:
                     con = readUtf8ConstantInfo();
                     break;
-                case ConstantInfo.CONSTANT_TAG_METHOD_HANDLE:
+                case ClassFile.CONSTANT_METHOD_HANDLE:
                     con = new MethodHandleConstantInfo(tag, in.readUnsignedByte(), in.readUnsignedShort());
                     break;
-                case ConstantInfo.CONSTANT_TAG_METHOD_TYPE:
+                case ClassFile.CONSTANT_METHOD_TYPE:
                     con = new MethodTypeConstantInfo(tag, in.readUnsignedShort());
                     break;
-                case ConstantInfo.CONSTANT_TAG_INVOKE_DYNAMIC:
+                case ClassFile.CONSTANT_INVOKE_DYNAMIC:
                     con = new InvokeDynamicConstantInfo(tag, in.readUnsignedShort(), in.readUnsignedShort());
                     break;
             }
@@ -135,7 +135,7 @@ public class ClassFileReader {
             pool.push(con);
 
             // 双精度需要占双位置
-            if (tag == ConstantInfo.CONSTANT_TAG_DOUBLE || tag == ConstantInfo.CONSTANT_TAG_LONG)
+            if (tag == ClassFile.CONSTANT_DOUBLE || tag == ClassFile.CONSTANT_LONG)
                 pool.push(new EmptyConstantInfo());
 
         }
@@ -150,21 +150,21 @@ public class ClassFileReader {
         for (int i = 0; i < len; i++)
             bytes[i] = in.readByte();
 
-        return new Utf8ConstantInfo(ConstantInfo.CONSTANT_TAG_UTF8, len, bytes);
+        return new Utf8ConstantInfo(ClassFile.CONSTANT_UTF8, len, bytes);
     }
 
     // 读取接口
-    private List<Interface> readInterfaces(int cnt, ConstantPool pool) throws IOException {
-        List<Interface> interfaces = new ArrayList<>();
+    private List<InterfaceInfo> readInterfaces(int cnt, ConstantPool pool) throws IOException {
+        List<InterfaceInfo> interfaceInfos = new ArrayList<>();
 
         for (int i = 1; i <= cnt; i++) {
 
             int idx = in.readUnsignedShort();
             String name = pool.getClassName(idx);
-            interfaces.add(new Interface(name));
+            interfaceInfos.add(new InterfaceInfo(name));
         }
 
-        return interfaces;
+        return interfaceInfos;
     }
 
     // 读取类字段
@@ -178,6 +178,7 @@ public class ClassFileReader {
             int descriptorIdx = in.readUnsignedShort();
             int attributeCnt = in.readUnsignedShort();
 
+            //todo
 
         }
 
@@ -239,7 +240,7 @@ public class ClassFileReader {
                     List<Instruction> instructions = readCodeByByte(codeBytes, pool);
 
                     int exTableLength = in.readUnsignedShort(); //异常数量
-                    Exception[] exceptions = new Exception[exTableLength + 10];
+                    ExceptionInfo[] exceptionInfos = new ExceptionInfo[exTableLength + 10];
                     for (int j = 0; j < exTableLength; j++) {
                         int etsp = in.readUnsignedShort();
                         int etep = in.readUnsignedShort();
@@ -250,14 +251,14 @@ public class ClassFileReader {
                         if (ctIdx != 0)
                             etClassname = pool.getClassName(ctIdx);
 
-                        Exception e = new Exception(etsp, etep, ethp, etClassname);
-                        exceptions[j] = e;
+                        ExceptionInfo e = new ExceptionInfo(etsp, etep, ethp, etClassname);
+                        exceptionInfos[j] = e;
                     }
 
                     int attrCnt = in.readUnsignedShort();
                     List<Attribute> attrs = readAttributes(attrCnt, pool);
 
-                    attr = new CodeAttribute(maxStackSize, maxLocals, instructions, exceptions, attrs);
+                    attr = new CodeAttribute(maxStackSize, maxLocals, instructions, exceptionInfos, attrs);
 
                     break;
                 case Attribute.LineNumberTable:
@@ -305,11 +306,12 @@ public class ClassFileReader {
     public List<Instruction> readCodeByByte(byte[] bytes, ConstantPool pool) throws IOException {
         List<Instruction> list = new ArrayList<>();
 
-        DataInputStream s = new DataInputStream(new ByteArrayInputStream(bytes));
+        ByteArrayInputStream ba = new ByteArrayInputStream(bytes);
+        DataInputStream s = new DataInputStream(ba);
         while (s.available() > 0) {
             int op = s.readUnsignedByte(); // 操作
 
-            Instruction ins = new InstructionReader(op, s, pool).read();
+            Instruction ins = new InstructionReader(op, ba, s, pool).read();
             if (ins == null) {
                 throw new ClassFileReaderException("ByteCodeReader", "Cannot transform instruction operation " + op + ".");
             }

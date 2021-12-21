@@ -22,4 +22,8 @@ public class LongConstantInfo extends ConstantInfo {
     public void setBytes(long bytes) {
         this.bytes = bytes;
     }
+
+    public long val() {
+        return bytes;
+    }
 }

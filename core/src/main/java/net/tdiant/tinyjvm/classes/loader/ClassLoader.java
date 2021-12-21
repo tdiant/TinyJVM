@@ -10,5 +10,4 @@ public class ClassLoader {
         this.in = in;
     }
 
-    public
 }

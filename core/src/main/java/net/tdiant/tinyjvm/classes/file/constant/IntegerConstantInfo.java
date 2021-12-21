@@ -21,4 +21,8 @@ public class IntegerConstantInfo extends ConstantInfo {
     public void setBytes(int bytes) {
         this.bytes = bytes;
     }
+
+    public int val() {
+        return bytes;
+    }
 }

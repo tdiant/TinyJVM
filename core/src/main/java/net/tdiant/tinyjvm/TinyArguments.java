@@ -1,14 +1,18 @@
 package net.tdiant.tinyjvm;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TinyArguments {
 
     private final String[] args;
 
-
-    private boolean version; // -version
+    private String mainClass = null;
+    private final List<String> classes = new ArrayList<>();
 
     public TinyArguments(String[] args) {
         this.args = args;
+        loadArguments();
     }
 
     private void loadArguments() {
@@ -26,10 +30,30 @@ public class TinyArguments {
                     System.out.println(" - help : show helps");
                     System.out.println(" - version : show version");
                     break;
+                case "-classes":
+                    while (i + 1 < args.length && !args[i + 1].startsWith("-"))
+                        classes.add(args[++i]);
+                    break;
+                case "-main":
+                    if (i + 1 < args.length && !args[i + 1].startsWith("-"))
+                        mainClass = args[++i];
+                    break;
             }
+            i += 1;
         }
 
+    }
 
+    public String[] getArgs() {
+        return args;
+    }
+
+    public List<String> getClasses() {
+        return classes;
+    }
+
+    public String getMainClass() {
+        return mainClass;
     }
 
 }
