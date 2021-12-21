@@ -15,6 +15,8 @@ public class Method extends BaseNametag {
     private List<ExceptionInfo> exceptionInfos;
     private LineNumTableAttribute lineNumAttr;
 
+    private Clazz clazz;
+
     public Method(int accessFlags, String name, String descriptor, int maxStacks, int maxLocals, Map<Integer, Instruction> instructions, List<ExceptionInfo> exceptionInfos, LineNumTableAttribute lineNumAttr) {
         super(accessFlags, name, descriptor);
         this.maxStacks = maxStacks;
@@ -62,5 +64,21 @@ public class Method extends BaseNametag {
 
     public void setLineNumAttr(LineNumTableAttribute lineNumAttr) {
         this.lineNumAttr = lineNumAttr;
+    }
+
+    public Clazz getClazz() {
+        return clazz;
+    }
+
+    public Integer getHandlerPc(int pc, String name) {
+    }
+
+    public String nativeMethodKey() {
+    }
+
+    public boolean isNative() {
+    }
+
+    public int getArgSlotSize() {
     }
 }

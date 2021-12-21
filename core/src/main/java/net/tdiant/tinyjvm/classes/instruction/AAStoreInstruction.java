@@ -2,7 +2,7 @@ package net.tdiant.tinyjvm.classes.instruction;
 
 import net.tdiant.tinyjvm.runtime.Frame;
 import net.tdiant.tinyjvm.runtime.Instance;
-import net.tdiant.tinyjvm.runtime.BaseArrayInstance;
+import net.tdiant.tinyjvm.runtime.InstanceArrayInstance;
 
 public class AAStoreInstruction extends Instruction {
 
@@ -10,8 +10,8 @@ public class AAStoreInstruction extends Instruction {
     public void run(Frame frame) {
         Instance num = frame.getOperandStack().pop().getInstance();
         int idx = frame.getOperandStack().pop().getInt();
-        BaseArrayInstance arr = (BaseArrayInstance) frame.getOperandStack().pop().getInstance();
-        arr.items[idx] = num;
+        InstanceArrayInstance arr = (InstanceArrayInstance) frame.getOperandStack().pop().getInstance();
+        arr.set(idx, num);
     }
 
     @Override

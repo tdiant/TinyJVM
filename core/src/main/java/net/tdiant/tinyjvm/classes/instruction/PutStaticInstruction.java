@@ -1,24 +1,41 @@
 package net.tdiant.tinyjvm.classes.instruction;
 
+import net.tdiant.tinyjvm.TinyJVM;
+import net.tdiant.tinyjvm.runtime.Clazz;
+import net.tdiant.tinyjvm.runtime.Field;
+import net.tdiant.tinyjvm.runtime.Frame;
+
 public class PutStaticInstruction extends Instruction {
 
-    private final String className;
-    private final String name;
-    private final String descriptor;
+    public final String clazz;
+    public final String fieldName;
+    public final String fieldDescriptor;
 
-    public PutStaticInstruction(String className, String name, String descriptor) {
-        super();
+    public PutStaticInstruction(String clazz, String fieldName, String fieldDescriptor) {
+        this.clazz = clazz;
+        this.fieldName = fieldName;
+        this.fieldDescriptor = fieldDescriptor;
     }
 
-    public String getClassName() {
-        return className;
+    @Override
+    public int delta() {
+        return 3;
     }
 
-    public String getName() {
-        return name;
+    @Override
+    public void run(Frame frame) {
+        Clazz cls = TinyJVM.vm.getHeap().getClazz(clazz);
+        if (cls == null) {
+            cls = frame.getMethod().getClazz().getClazzLoader().loadClazz(clazz);
+        }
+        Field field = cls.getField(fieldName, fieldDescriptor);
+        field.set(frame);
     }
 
-    public String getDescriptor() {
-        return descriptor;
+    @Override
+    public String toString() {
+        return "putstatic " + clazz + " " + fieldName + " " + fieldDescriptor;
     }
+
+
 }

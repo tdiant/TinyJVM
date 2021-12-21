@@ -40,4 +40,7 @@ public class Thread {
         return this.frames[top - 2];
     }
 
+    public boolean empty() {
+        return top <= 0;
+    }
 }

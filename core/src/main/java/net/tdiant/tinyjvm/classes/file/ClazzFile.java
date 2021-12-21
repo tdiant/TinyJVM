@@ -4,7 +4,7 @@ import net.tdiant.tinyjvm.classes.file.attr.Attribute;
 
 import java.util.List;
 
-public class ClassFile {
+public class ClazzFile {
 
     public static final int CLASS_LOADED = 1;
     public static final int CLASS_LINKED = 2;
@@ -58,7 +58,7 @@ public class ClassFile {
     private int attributeCnt; // 类属性数量
     private List<Attribute> attributes; // 类属性列表
 
-    public ClassFile(int classFileTag, int minorVer, int majorVer, int constantPoolSize, ConstantPool constantPool, int accessFlag, int thisClass, int superClass, int interfaceCnt, List<InterfaceInfo> interfaceInfos, int fieldCnt, List<FieldInfo> fields, int methodCnt, List<MethodInfo> methods, int attributeCnt, List<Attribute> attributes) {
+    public ClazzFile(int classFileTag, int minorVer, int majorVer, int constantPoolSize, ConstantPool constantPool, int accessFlag, int thisClass, int superClass, int interfaceCnt, List<InterfaceInfo> interfaceInfos, int fieldCnt, List<FieldInfo> fields, int methodCnt, List<MethodInfo> methods, int attributeCnt, List<Attribute> attributes) {
         this.classFileTag = classFileTag;
         this.minorVer = minorVer;
         this.majorVer = majorVer;

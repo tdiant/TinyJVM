@@ -9,7 +9,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClassFileReader {
+public class ClazzFileReader {
 
     private final File file;
     private final DataInputStream in;
@@ -19,7 +19,7 @@ public class ClassFileReader {
      *
      * @param file 类文件
      */
-    public ClassFileReader(File file) throws IOException {
+    public ClazzFileReader(File file) throws IOException {
         this.file = file;
         this.in = new DataInputStream(new FileInputStream(file));
     }
@@ -29,7 +29,7 @@ public class ClassFileReader {
      *
      * @return 类对象
      */
-    public ClassFile read() throws IOException {
+    public ClazzFile read() throws IOException {
 
         int classFileTag = in.readInt(); // Class文件标记
 
@@ -55,7 +55,7 @@ public class ClassFileReader {
         int attributeCnt = in.readUnsignedShort(); // 类属性数量
         List<Attribute> attributes = readAttributes(attributeCnt, constantPool); // 类属性列表
 
-        return new ClassFile(
+        return new ClazzFile(
                 classFileTag,
                 minorVer,
                 majorVer,
@@ -85,46 +85,46 @@ public class ClassFileReader {
             ConstantInfo con = null;
 
             switch (tag) {
-                case ClassFile.CONSTANT_CLASS:
+                case ClazzFile.CONSTANT_CLASS:
                     con = new ClassConstantInfo(tag, in.readUnsignedShort());
                     break;
-                case ClassFile.CONSTANT_FIELD_REF:
+                case ClazzFile.CONSTANT_FIELD_REF:
                     con = new FieldConstantInfo(tag, in.readUnsignedShort(), in.readUnsignedShort());
                     break;
-                case ClassFile.CONSTANT_METHOD_REF:
+                case ClazzFile.CONSTANT_METHOD_REF:
                     con = new MethodConstantInfo(tag, in.readUnsignedShort(), in.readUnsignedShort());
                     break;
-                case ClassFile.CONSTANT_INTERFACE_METHOD_REF:
+                case ClazzFile.CONSTANT_INTERFACE_METHOD_REF:
                     con = new InterfaceMethodConstantInfo(tag, in.readUnsignedShort(), in.readUnsignedShort());
                     break;
-                case ClassFile.CONSTANT_STRING:
+                case ClazzFile.CONSTANT_STRING:
                     con = new StringConstantInfo(tag, in.readUnsignedShort());
                     break;
-                case ClassFile.CONSTANT_INTEGER:
+                case ClazzFile.CONSTANT_INTEGER:
                     con = new IntegerConstantInfo(tag, in.readInt());
                     break;
-                case ClassFile.CONSTANT_FLOAT:
+                case ClazzFile.CONSTANT_FLOAT:
                     con = new FloatConstantInfo(tag, in.readFloat());
                     break;
-                case ClassFile.CONSTANT_LONG:
+                case ClazzFile.CONSTANT_LONG:
                     con = new LongConstantInfo(tag, in.readLong());
                     break;
-                case ClassFile.CONSTANT_DOUBLE:
+                case ClazzFile.CONSTANT_DOUBLE:
                     con = new DoubleConstantInfo(tag, in.readDouble());
                     break;
-                case ClassFile.CONSTANT_NAME_AND_TAG:
+                case ClazzFile.CONSTANT_NAME_AND_TAG:
                     con = new NameAndTypeConstantInfo(tag, in.readUnsignedShort(), in.readUnsignedShort());
                     break;
-                case ClassFile.CONSTANT_UTF8:
+                case ClazzFile.CONSTANT_UTF8:
                     con = readUtf8ConstantInfo();
                     break;
-                case ClassFile.CONSTANT_METHOD_HANDLE:
+                case ClazzFile.CONSTANT_METHOD_HANDLE:
                     con = new MethodHandleConstantInfo(tag, in.readUnsignedByte(), in.readUnsignedShort());
                     break;
-                case ClassFile.CONSTANT_METHOD_TYPE:
+                case ClazzFile.CONSTANT_METHOD_TYPE:
                     con = new MethodTypeConstantInfo(tag, in.readUnsignedShort());
                     break;
-                case ClassFile.CONSTANT_INVOKE_DYNAMIC:
+                case ClazzFile.CONSTANT_INVOKE_DYNAMIC:
                     con = new InvokeDynamicConstantInfo(tag, in.readUnsignedShort(), in.readUnsignedShort());
                     break;
             }
@@ -135,7 +135,7 @@ public class ClassFileReader {
             pool.push(con);
 
             // 双精度需要占双位置
-            if (tag == ClassFile.CONSTANT_DOUBLE || tag == ClassFile.CONSTANT_LONG)
+            if (tag == ClazzFile.CONSTANT_DOUBLE || tag == ClazzFile.CONSTANT_LONG)
                 pool.push(new EmptyConstantInfo());
 
         }
@@ -150,7 +150,7 @@ public class ClassFileReader {
         for (int i = 0; i < len; i++)
             bytes[i] = in.readByte();
 
-        return new Utf8ConstantInfo(ClassFile.CONSTANT_UTF8, len, bytes);
+        return new Utf8ConstantInfo(ClazzFile.CONSTANT_UTF8, len, bytes);
     }
 
     // 读取接口

@@ -75,4 +75,16 @@ public class Frame {
     public void setStat(int stat) {
         this.stat = stat;
     }
+
+    public String getCurrentMethodFullName() {
+    }
+
+    public String getCurrentSource() {
+    }
+
+    public String getCurrentLine() {
+    }
+
+    public Instance getThis(int size) {
+    }
 }

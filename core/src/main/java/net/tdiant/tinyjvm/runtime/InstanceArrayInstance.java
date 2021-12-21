@@ -2,19 +2,23 @@ package net.tdiant.tinyjvm.runtime;
 
 public class InstanceArrayInstance extends BaseArrayInstance {
 
-    private final Instance[] arr;
+    private final Object[] arr;
 
-    public InstanceArrayInstance(Clazz clazz, Instance[] arr) {
+    public InstanceArrayInstance(Clazz clazz, Object[] arr) {
         super(clazz, arr.length);
         this.arr = arr;
     }
 
-    public Instance[] getArray() {
+    public Object[] getArray() {
         return arr;
     }
 
-    public Instance get(int idx) {
+    public Object get(int idx) {
         return arr[idx];
+    }
+
+    public void set(int idx, Object obj) {
+        arr[idx] = obj;
     }
 
     public int length() {

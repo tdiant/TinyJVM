@@ -392,8 +392,8 @@ public class InstructionReader {
                 return readGetterAndPutter(6);
             case 0xb9:
                 return readGetterAndPutter(7);
-            case 0xba:
-                return readInvokeDynamic();
+//            case 0xba:
+//                return readInvokeDynamic();
             case 0xbb:
                 return new NewInstruction(pool.getClassName(s.readUnsignedShort()));
             case 0xbc:
@@ -404,8 +404,6 @@ public class InstructionReader {
                 return new ArrayLengthInstruction();
             case 0xbf:
                 return new AThrowInstruction();
-            case 0xc0:
-                return new CheckcastInstruction(pool.getClassName(s.readUnsignedShort()));
             case 0xc1:
                 return new InstanceOfInstruction(pool.getClassName(s.readUnsignedShort()));
             case 0xc4:
@@ -432,9 +430,9 @@ public class InstructionReader {
                         return new WideInstruction(4, new DStoreInstruction(s.readUnsignedShort()));
                     case 0x84:
                         return new WideInstruction(4, new IIncInstruction(s.readUnsignedShort(), s.readUnsignedShort()));
+                    default:
+                        throw new UnsupportedOperationException();
                 }
-            case 0xc5:
-                return new MultiANewArrayInst(s.readUnsignedShort(), s.readUnsignedByte());
             case 0xc6:
                 return new IfNullInstruction(s.readShort());
             case 0xc7:
@@ -444,8 +442,10 @@ public class InstructionReader {
 
             case 0xa8:
             case 0xa9:
+            case 0xc0:
             case 0xc2:
             case 0xc3:
+            case 0xc5:
             case 0xc9:
             default:
                 throw new UnsupportedOperationException("" + op);
@@ -471,13 +471,13 @@ public class InstructionReader {
         int idx = s.readUnsignedByte();
         ConstantInfo info = pool.get(idx - 1);
         switch (info.getTag()) {
-            case ClassFile.CONSTANT_STRING:
+            case ClazzFile.CONSTANT_STRING:
                 int strIdx = ((StringConstantInfo) info).getStringIndex();
                 String str = ((Utf8ConstantInfo) pool.get(strIdx - 1)).str();
                 return new LdcInstruction("Ljava/lang/String", str);
-            case ClassFile.CONSTANT_INTEGER:
+            case ClazzFile.CONSTANT_INTEGER:
                 return new LdcInstruction("I", ((IntegerConstantInfo) info).val());
-            case ClassFile.CONSTANT_FLOAT:
+            case ClazzFile.CONSTANT_FLOAT:
                 return new LdcInstruction("F", ((FloatConstantInfo) info).val());
             default:
                 throw new InstructionReaderException();
@@ -488,15 +488,15 @@ public class InstructionReader {
         int idx = s.readUnsignedShort();
         ConstantInfo info = pool.get(idx - 1);
         switch (info.getTag()) {
-            case ClassFile.CONSTANT_STRING:
+            case ClazzFile.CONSTANT_STRING:
                 int strIdx = ((StringConstantInfo) info).getStringIndex();
                 String str = ((Utf8ConstantInfo) pool.get(strIdx - 1)).str();
                 return new LdcWInstruction("Ljava/lang/String", str);
-            case ClassFile.CONSTANT_INTEGER:
+            case ClazzFile.CONSTANT_INTEGER:
                 return new LdcWInstruction("I", ((IntegerConstantInfo) info).val());
-            case ClassFile.CONSTANT_FLOAT:
+            case ClazzFile.CONSTANT_FLOAT:
                 return new LdcWInstruction("F", ((FloatConstantInfo) info).val());
-            case ClassFile.CONSTANT_CLASS:
+            case ClazzFile.CONSTANT_CLASS:
                 return new LdcWInstruction("L", info);
             default:
                 throw new InstructionReaderException();
@@ -507,9 +507,9 @@ public class InstructionReader {
         int idx = s.readUnsignedShort();
         ConstantInfo info = pool.get(idx - 1);
         switch (info.getTag()) {
-            case ClassFile.CONSTANT_DOUBLE:
+            case ClazzFile.CONSTANT_DOUBLE:
                 return new Ldc2WInstruction(((DoubleConstantInfo) info).val());
-            case ClassFile.CONSTANT_LONG:
+            case ClazzFile.CONSTANT_LONG:
                 return new Ldc2WInstruction(((LongConstantInfo) info).val());
             default:
                 throw new InstructionReaderException();
@@ -586,7 +586,10 @@ public class InstructionReader {
                 return new InvokeInterfaceInstruction(
                         union.className,
                         union.name,
-                        union.descriptor
+                        union.descriptor,
+                        s.readUnsignedByte(),
+                        s.readUnsignedByte()
+
                 );
             default:
                 return null;
@@ -617,18 +620,18 @@ public class InstructionReader {
 
     }
 
-    public InvokeDynamicInstruction readInvokeDynamic() throws IOException {
-        int idx = s.readUnsignedShort();
-        InvokeDynamicConstantInfo info = (InvokeDynamicConstantInfo) pool.get(idx - 1);
-
-        NameAndTypeConstantInfo nameAndType = (NameAndTypeConstantInfo) pool.get(info.getNameAndTypeIndex());
-
-        return new InvokeDynamicInstruction(
-                pool.getString(nameAndType.getNameIndex()),
-                pool.getString(nameAndType.getDescriptorIndex()),
-                info.getBootstrapMethodAttrIndex()
-        );
-    }
+//    public InvokeDynamicInstruction readInvokeDynamic() throws IOException {
+//        int idx = s.readUnsignedShort();
+//        InvokeDynamicConstantInfo info = (InvokeDynamicConstantInfo) pool.get(idx - 1);
+//
+//        NameAndTypeConstantInfo nameAndType = (NameAndTypeConstantInfo) pool.get(info.getNameAndTypeIndex());
+//
+//        return new InvokeDynamicInstruction(
+//                pool.getString(nameAndType.getNameIndex()),
+//                pool.getString(nameAndType.getDescriptorIndex()),
+//                info.getBootstrapMethodAttrIndex()
+//        );
+//    }
 
     public int getOperation() {
         return op;

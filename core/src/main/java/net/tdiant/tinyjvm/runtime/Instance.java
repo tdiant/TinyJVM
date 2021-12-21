@@ -26,4 +26,7 @@ public class Instance {
     public Clazz getClazz() {
         return clazz;
     }
+
+    public Field getField(String value, String s) {
+    }
 }
