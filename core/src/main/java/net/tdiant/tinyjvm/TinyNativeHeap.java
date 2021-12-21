@@ -23,6 +23,12 @@ public class TinyNativeHeap {
         classesMap.put(key, clazz);
     }
 
+    public void registerEmptyMethod(String key) {
+        if (nativeMethods.containsKey(key)) return;
+        nativeMethods.put(key, frame -> {
+        });
+    }
+
     public NativeMethod getMethod(String key) {
         return nativeMethods.get(key);
     }

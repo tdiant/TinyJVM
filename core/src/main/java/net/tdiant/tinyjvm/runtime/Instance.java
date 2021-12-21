@@ -29,4 +29,7 @@ public class Instance {
 
     public Field getField(String value, String s) {
     }
+
+    public void setField(String value, String d, Slot slot) {
+    }
 }

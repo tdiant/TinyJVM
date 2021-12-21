@@ -7,15 +7,16 @@ public class TinyArguments {
 
     private final String[] args;
 
+    private int maxThreadSize = 2048; // 调用栈大小
+
     private String mainClass = null;
     private final List<String> classes = new ArrayList<>();
 
     public TinyArguments(String[] args) {
         this.args = args;
-        loadArguments();
     }
 
-    private void loadArguments() {
+    public void loadArguments() {
 
         int i = 0;
         while (i < args.length) {
@@ -54,6 +55,10 @@ public class TinyArguments {
 
     public String getMainClass() {
         return mainClass;
+    }
+
+    public int getMaxThreadSize() {
+        return maxThreadSize;
     }
 
 }

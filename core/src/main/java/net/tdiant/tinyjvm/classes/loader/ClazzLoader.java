@@ -10,6 +10,11 @@ public class ClazzLoader {
     public ClazzLoader(String name, ClazzSource source) {
         this.name = name;
         this.source = source;
+
+    }
+
+    public ClazzLoader(ClazzSource source) {
+        this("runtime_default", source);
     }
 
     public Clazz loadClazz(String name) {

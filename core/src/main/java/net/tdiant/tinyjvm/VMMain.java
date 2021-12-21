@@ -1,19 +1,34 @@
 package net.tdiant.tinyjvm;
 
+import net.tdiant.tinyjvm.classes.loader.ClazzLoader;
+import net.tdiant.tinyjvm.natives.*;
+import net.tdiant.tinyjvm.runtime.Frame;
 import net.tdiant.tinyjvm.runtime.Method;
 import net.tdiant.tinyjvm.runtime.Thread;
 
 public class VMMain {
 
-    private final Thread mainThread;
-    private final TinyNativeHeap heap;
-
-    public VMMain() {
-        this.mainThread = new Thread(VMSettings.maxThreadSize);
-        this.heap = new TinyNativeHeap();
-    }
+    private Thread mainThread;
+    private TinyNativeHeap heap;
 
     public void run() {
+
+        this.mainThread = new Thread(TinyJVM.args.getMaxThreadSize());
+        this.heap = new TinyNativeHeap();
+
+        ClazzLoader clazzLoader = new ClazzLoader("vm_startup", )
+
+        initNatives();
+
+    }
+
+    private void initNatives() {
+
+        JavaLangObject.registerNatives();
+        JavaLangClass.registerNatives();
+        JavaLangSystem.registerNatives();
+        JavaLangFloat.registerNatives();
+        JavaLangDouble.registerNatives();
 
     }
 
@@ -26,12 +41,10 @@ public class VMMain {
     }
 
     public void execute(Method method) {
-        final Thread env = MetaSpace.getMainEnv();
         Frame newFrame = new Frame(method);
-        // 传参
-        final int slots = method.getArgSlotSize();
+        int slots = method.getArgSlotSize();
         if (slots > 0) {
-            final Frame old = env.topFrame();
+            Frame old = this.mainThread.now();
             for (int i = slots - 1; i >= 0; i--) {
                 newFrame.set(i, old.pop());
             }
