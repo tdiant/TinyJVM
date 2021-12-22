@@ -27,7 +27,7 @@ public class ANewArrayInstruction extends Instruction {
 
         Clazz clazz = TinyJVM.vm.getHeap().getClazz(name);
         if (clazz == null) {
-            clazz = new Clazz(1, name, superClassName, interfaceNames, methods, fields, bootstrapMethods, clzFile.cpInfo, cls.getClazzLoader(), null);
+            clazz = new Clazz(1, name, cls.getClazzLoader(), null);
             clazz.setSuperClass(TinyJVM.vm.getHeap().getClazz("java/lang/Object"));
             clazz.setStat(2);
             TinyJVM.vm.getHeap().registerClass(name, clazz);

@@ -16,7 +16,7 @@ public class AThrowInstruction extends Instruction {
         Integer handlerPc = frame.getMethod().getHandlerPc(frame.getPc(), name);
         while (handlerPc == null && !thread.empty()) {
             Frame ef = thread.pop();
-            String msg = ef.getCurrentMethodFullName() + "(" + ef.getCurrentSource() + ":" + ef.getCurrentLine() + ")";
+            String msg = ef.getCurrentMethodFullName() + "(" + ef.getMethod().getClazz().getClazzLoader().getSource().sourcePath() + ":" + ef.getCurrentLine() + ")";
             System.err.println(msg);
             if (thread.empty()) {
                 break;

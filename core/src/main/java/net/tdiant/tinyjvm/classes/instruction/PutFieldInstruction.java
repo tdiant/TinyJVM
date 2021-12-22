@@ -35,7 +35,7 @@ public class PutFieldInstruction extends Instruction {
 
         Instance self = frame.getOperandStack().pop().getInstance();
         Field field = self.getField(fieldName, fieldDescriptor);
-        field.set(s);
+        field.setVal(s);
     }
 
     @Override

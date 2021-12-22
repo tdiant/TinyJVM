@@ -86,7 +86,7 @@ public class GetStaticInstruction extends Instruction {
             throw new IllegalStateException();
         }
 
-        field.get(frame);
+        field.pushStack(frame);
     }
 
 

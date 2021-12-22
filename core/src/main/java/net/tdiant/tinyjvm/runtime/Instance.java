@@ -39,6 +39,15 @@ public class Instance {
         return this.superInstance.getField(name, descriptor);
     }
 
+    public void setField(String name, String descriptor, Slot val) {
+        Field field = getField(name, descriptor);
+        this.setField(field, val);
+    }
+
+    public void setField(Field field, Slot val) {
+        field.setVal(val);
+    }
+
     public List<Field> getFields() {
         return fields;
     }

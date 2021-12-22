@@ -6,4 +6,6 @@ public interface ClazzSource {
 
     ClazzFile findClazz(String name);
 
+    String sourcePath();
+
 }

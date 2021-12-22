@@ -22,4 +22,20 @@ public class OperandStack {
         return s;
     }
 
+    public Slot get(int idx) {
+        return arr[idx];
+    }
+
+    public void set(int idx, Slot slot) {
+        arr[idx] = slot;
+    }
+
+    public Slot[] getSlots() {
+        return arr;
+    }
+
+    public int getCount() {
+        return cnt;
+    }
+
 }

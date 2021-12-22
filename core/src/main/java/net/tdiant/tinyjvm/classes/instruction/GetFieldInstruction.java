@@ -29,13 +29,13 @@ public class GetFieldInstruction extends Instruction {
             Instance obj = frame.getOperandStack().pop().getInstance();
             Field field = obj.getField(fieldName, fieldDescriptor);
             field.setVal(new Slot(RuntimeUtils.str2Obj("UTF-8", obj.getClazz().getClazzLoader())));
-            field.get(frame);
+            field.pushStack(frame);
             return;
         }
 
         Instance obj = frame.getOperandStack().pop().getInstance();
         Field field = obj.getField(fieldName, fieldDescriptor);
-        field.get(frame);
+        field.pushStack(frame);
     }
 
     @Override

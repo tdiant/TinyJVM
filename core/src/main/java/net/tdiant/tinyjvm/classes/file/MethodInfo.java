@@ -46,4 +46,20 @@ public class MethodInfo {
 
         return null;
     }
+
+    public int getAccessFlags() {
+        return accessFlags;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescriptor() {
+        return descriptor;
+    }
+
+    public List<Attribute> getAttributes() {
+        return attributes;
+    }
 }

@@ -1,5 +1,7 @@
 package net.tdiant.tinyjvm;
 
+import net.tdiant.tinyjvm.classes.file.ClazzFile;
+import net.tdiant.tinyjvm.classes.instruction.Instruction;
 import net.tdiant.tinyjvm.classes.loader.ClazzLoader;
 import net.tdiant.tinyjvm.natives.*;
 import net.tdiant.tinyjvm.runtime.Thread;
@@ -20,6 +22,8 @@ public class VMMain {
 
         initNatives();
         initPrimitiveClasses(clazzLoader);
+
+        initSystemOut(clazzLoader);
 
     }
 
@@ -90,83 +94,63 @@ public class VMMain {
 
     }
 
+    private void initSystemOut(ClazzLoader classLoader) {
+        Clazz fdCls = classLoader.loadClazz("java/io/FileDescriptor");
+        Instance outFdObj = fdCls.newInstance();
+        Method fdInitMethod = fdCls.getMethod("<init>", "(I)V");
+
+        Frame f1 = new Frame(fdInitMethod);
+        f1.getOperandStack().set(0, new Slot(outFdObj));
+        f1.getOperandStack().set(1, new Slot(1));
+        execute(f1);
+
+        Clazz fosCls = classLoader.loadClazz("java/io/FileOutputStream");
+        Instance fosObj = fosCls.newInstance();
+        Method fosInitMethod = fosCls.getMethod("<init>", "(Ljava/io/FileDescriptor;)V");
+
+        Frame f2 = new Frame(fosInitMethod);
+        f2.getOperandStack().set(0, new Slot(fosObj));
+        f2.getOperandStack().set(1, new Slot(outFdObj));
+        execute(f2);
+
+        Clazz psCls = classLoader.loadClazz("java/io/PrintStream");
+        Instance psObj = psCls.newInstance();
+        Method psInitMethod = psCls.getMethod("<init>", "(Ljava/io/OutputStream;Z)V");
+        Frame frame = new Frame(psInitMethod);
+        f2.getOperandStack().set(0, new Slot(psObj));
+        f2.getOperandStack().set(1, new Slot(fosObj));
+        f2.getOperandStack().set(2, new Slot(1));
+        execute(frame);
+
+        Clazz sysCls = classLoader.loadClazz("java/lang/System");
+        Field outField = sysCls.getField("out", "Ljava/io/PrintStream;");
+        outField.setVal(new Slot(psObj));
+    }
+
     public void execute(Method method) {
         Frame newFrame = new Frame(method);
         int slots = method.getArgSlotSize();
         if (slots > 0) {
             Frame old = this.mainThread.now();
             for (int i = slots - 1; i >= 0; i--) {
-                newFrame.set(i, old.pop());
+                newFrame.getLocalVars().set(i, old.getOperandStack().pop());
             }
         }
         execute(newFrame);
     }
 
     public void execute(Frame newFrame) {
-        final Thread env = MetaSpace.getMainEnv();
-        env.pushFrame(newFrame);
+        mainThread.push(newFrame);
+        newFrame.setStat(ClazzFile.FAKE_FRAME);
 
-        newFrame.stat = Const.FAKE_FRAME;
         do {
-            Frame frame = env.topFrame();
-            Instruction instruction = frame.getInst();
-            frame.nextPc += instruction.offset();
-            traceBefore(instruction, frame);
-            instruction.execute(frame);
-        } while (newFrame.stat == Const.FAKE_FRAME);
-    }
+            Frame frame = mainThread.now();
+            frame.setPc(frame.getNextPc());
+            Instruction instruction = frame.getInstructions().get(frame.getPc());
+            frame.setNextPc(frame.getNextPc() + instruction.delta());
 
-    public void runMain(Method method, String[] args) {
-        Frame frame = new Frame(method);
-
-        Instance[] kargs = new Instance[args.length];
-        for (int i = 0; i < args.length; i++) {
-            kargs[i] = Utils.str2Obj(args[i], frame.method.clazz.clazzLoader);
-        }
-        Class arrClazz = Heap.findClass("[Ljava/lang/String;");
-        if (arrClazz == null) {
-            arrClazz = new Class(1, "[Ljava/lang/String;", method.clazz.clazzLoader, null);
-            Heap.registerClass(arrClazz.name, arrClazz);
-        }
-        InstanceArray array = new InstanceArray(arrClazz, kargs);
-        frame.setRef(0, array);
-
-        execute(frame);
-    }
-
-    private void traceBefore(Instruction inst, Frame frame) {
-        if (EnvHolder.verboseDebug) {
-            debugBefore(inst, frame);
-        }
-        // verboseTrace
-        if (EnvHolder.verboseTrace) {
-            trace(inst, frame);
-        }
-        // verboseCall
-        if (EnvHolder.verboseCall) {
-            call(inst, frame);
-        }
-    }
-
-    private void call(Instruction inst, Frame frame) {
-        if (!inst.format().startsWith("invoke")) {
-            return;
-        }
-        String space = genSpace((frame.thread.size() - 1) * 2);
-        Logger.trace(space.concat(Integer.toString(frame.getPc()).concat(" ").concat(inst.format())));
-    }
-
-    private void trace(Instruction inst, Frame frame) {
-        String space = genSpace((frame.thread.size() - 1) * 2);
-        Logger.trace(space.concat(Integer.toString(frame.getPc()).concat(" ").concat(inst.format())));
-    }
-
-    public String genSpace(int size) {
-        String x = "";
-        for (int i = 0; i < size; i++) {
-            x = x.concat(" ");
-        }
-        return x;
+            instruction.run(frame);
+        } while (newFrame.getStat() == ClazzFile.FAKE_FRAME);
     }
 
 }

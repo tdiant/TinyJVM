@@ -23,13 +23,24 @@ public class Frame {
 
     private int stat;
 
-
     public Frame(Method method) {
         this.method = method;
         this.localVars = new LocalVariableTable(method.getMaxLocals());
         this.operandStack = new OperandStack(method.getMaxStacks());
         this.thread = TinyJVM.vm.getMainThread(); //todo 不支持多线程
         this.instructions = new HashMap<>(method.getInstructions());
+    }
+
+    public Frame(Method method, LocalVariableTable localVars, Thread thread) {
+        this.method = method;
+        this.localVars = localVars;
+        this.operandStack = new OperandStack(method.getMaxStacks());
+        this.thread = thread; //todo 不支持多线程
+        this.instructions = new HashMap<>(method.getInstructions());
+    }
+
+    public Instance getThis(int size) {
+        return this.operandStack.get(this.operandStack.getCount() - size).getInstance();
     }
 
     public Method getMethod() {
@@ -77,14 +88,11 @@ public class Frame {
     }
 
     public String getCurrentMethodFullName() {
+        return this.method.getClazz().getName() + "." + this.method.getName();
     }
 
-    public String getCurrentSource() {
+    public int getCurrentLine() {
+        return this.method.getLine(this.pc);
     }
 
-    public String getCurrentLine() {
-    }
-
-    public Instance getThis(int size) {
-    }
 }

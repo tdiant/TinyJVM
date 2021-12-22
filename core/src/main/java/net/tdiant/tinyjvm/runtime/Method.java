@@ -86,6 +86,16 @@ public class Method extends BaseNametag {
         return cnt;
     }
 
+    public int getLine(int pc) {
+        int ret = 0;
+        for (LineNumTableAttribute.Line line : this.lineNumAttr.getLines()) {
+            if (line.getStartPc() <= pc) {
+                ret = line.getLineNum();
+            } else break;
+        }
+        return ret;
+    }
+
     public int getMaxStacks() {
         return maxStacks;
     }
@@ -133,4 +143,6 @@ public class Method extends BaseNametag {
     public void setClazz(Clazz clazz) {
         this.clazz = clazz;
     }
+
+
 }

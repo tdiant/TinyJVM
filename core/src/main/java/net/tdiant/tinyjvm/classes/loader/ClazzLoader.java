@@ -120,5 +120,11 @@ public class ClazzLoader {
         return new Field(fieldInfo.getAccessFlags(), fieldInfo.getName(), fieldInfo.getDescriptor());
     }
 
+    public String getName() {
+        return name;
+    }
 
+    public ClazzSource getSource() {
+        return source;
+    }
 }
