@@ -26,7 +26,7 @@ public class InvokeSpecialInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        NativeMethod nm = TinyJVM.vm.getHeap().getMethod(RuntimeUtils.genNativeMethodKey(clazz, methodName, methodDescriptor));
+        NativeMethod nm = TinyJVM.vm.getHeap().getMethod(RuntimeUtils.nativeMethodKey(clazz, methodName, methodDescriptor));
         if (nm != null) {
             nm.invoke(frame);
             return;

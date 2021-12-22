@@ -28,7 +28,7 @@ public class InvokeVirtualInstruction extends Instruction {
         if (Objects.equals("sun/misc/Unsafe", clazz)
                 || Objects.equals("java/util/Properties", clazz)
                 || Objects.equals("java/util/zip/ZipFile", clazz)) {
-            NativeMethod nativeMethod = TinyJVM.vm.getHeap().getMethod(RuntimeUtils.genNativeMethodKey(clazz, methodName, methodDescriptor));
+            NativeMethod nativeMethod = TinyJVM.vm.getHeap().getMethod(RuntimeUtils.nativeMethodKey(clazz, methodName, methodDescriptor));
             if (nativeMethod != null) {
                 nativeMethod.invoke(frame);
                 return;
@@ -63,7 +63,7 @@ public class InvokeVirtualInstruction extends Instruction {
         Instance self = frame.getThis(size);
         Method implMethod = self.getClazz().getMethod(methodName, methodDescriptor);
 
-        NativeMethod nm = TinyJVM.vm.getHeap().getMethod(RuntimeUtils.genNativeMethodKey(implMethod));
+        NativeMethod nm = TinyJVM.vm.getHeap().getMethod(implMethod.nativeMethodKey());
         if (nm != null) {
             nm.invoke(frame);
             return;

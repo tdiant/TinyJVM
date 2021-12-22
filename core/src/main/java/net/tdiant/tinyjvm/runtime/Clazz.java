@@ -160,6 +160,13 @@ public class Clazz extends BaseNametag {
         return false;
     }
 
+    public boolean isInterface() {
+        return (getAccessFlags() & 0x0200) != 0;
+    }
+    public boolean isPrimitive() {
+        return (getAccessFlags() & 0x1000) != 0;
+    }
+
     public void interfaceInit(Frame frame) {
         List<Clazz> interfaces = new ArrayList<>();
         for (String interfaceName : this.interfaceNames) {

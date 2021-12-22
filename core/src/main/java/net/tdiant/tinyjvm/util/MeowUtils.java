@@ -12,6 +12,11 @@ public class MeowUtils {
             public ClazzFile findClazz(String name) {
                 return null;
             }
+
+            @Override
+            public String sourcePath() {
+                return "<test_dir>";
+            }
         };
     }
 

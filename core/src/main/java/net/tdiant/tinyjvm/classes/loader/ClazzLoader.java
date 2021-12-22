@@ -3,8 +3,9 @@ package net.tdiant.tinyjvm.classes.loader;
 import net.tdiant.tinyjvm.TinyJVM;
 import net.tdiant.tinyjvm.classes.file.*;
 import net.tdiant.tinyjvm.classes.file.attr.BootstrapMethodsAttribute;
+import net.tdiant.tinyjvm.classes.file.constant.ClassConstantInfo;
+import net.tdiant.tinyjvm.classes.file.constant.Utf8ConstantInfo;
 import net.tdiant.tinyjvm.runtime.*;
-import net.tdiant.tinyjvm.util.RuntimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,7 +50,7 @@ public class ClazzLoader {
         TinyJVM.vm.getHeap().registerClass(clazz.getName(), clazz);
         for (Method m : clazz.getMethods()) {
             if (!m.isNative()) continue;
-            String key = RuntimeUtils.genNativeMethodKey(m.getClazz().getName(), m.getName(), m.getDescriptor());
+            String key = m.nativeMethodKey();
             NativeMethod nm = TinyJVM.vm.getHeap().getMethod(key);
             if (nm == null) {
                 System.err.println("The method " + key + " not found.");
@@ -90,7 +91,8 @@ public class ClazzLoader {
         int scIdx = clzFile.getSuperClass();
         String superClassName = null;
         if (scIdx != 0) {
-            superClassName = RuntimeUtils.getClassName(clzFile.cpInfo, scIdx);
+            int nameIdx = ((ClassConstantInfo) clzFile.getConstantPool().get(scIdx)).getNameIndex();
+            superClassName = ((Utf8ConstantInfo) clzFile.getConstantPool().get(nameIdx - 1)).str();
         }
 
         List<String> interfaceNames = new ArrayList<>();

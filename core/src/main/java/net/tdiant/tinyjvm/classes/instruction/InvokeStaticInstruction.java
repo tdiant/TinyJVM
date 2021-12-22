@@ -26,7 +26,7 @@ public class InvokeStaticInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        NativeMethod nm = TinyJVM.vm.getHeap().getMethod(RuntimeUtils.genNativeMethodKey(clazzName, methodName, descriptor));
+        NativeMethod nm = TinyJVM.vm.getHeap().getMethod(RuntimeUtils.nativeMethodKey(clazzName, methodName, descriptor));
         if (nm != null) {
             nm.invoke(frame);
             return;
