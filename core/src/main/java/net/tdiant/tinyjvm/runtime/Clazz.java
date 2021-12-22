@@ -1,12 +1,18 @@
 package net.tdiant.tinyjvm.runtime;
 
+import net.tdiant.tinyjvm.TinyJVM;
 import net.tdiant.tinyjvm.classes.file.ClazzFile;
 import net.tdiant.tinyjvm.classes.file.ConstantPool;
 import net.tdiant.tinyjvm.classes.file.attr.BootstrapMethodsAttribute;
 import net.tdiant.tinyjvm.classes.loader.ClazzLoader;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
+/**
+ * 类实例
+ */
 public class Clazz extends BaseNametag {
 
     private final String superClassName;
@@ -24,20 +30,159 @@ public class Clazz extends BaseNametag {
 
     private Instance runtimeClass;
 
-    public Clazz(int accessFlags, String name, ClazzLoader clazzLoader, ClazzFile clazzFile) {
-        super(accessFlags, name, descriptor);
+    public Clazz(int accessFlags, String name, String superClassName, List<String> interfaceNames, List<Method> methods, List<Field> fields, BootstrapMethodsAttribute bootstrapMethods, ConstantPool constantPool, ClazzLoader classLoader, ClazzFile classFile) {
+        super(accessFlags, name, "");
         this.superClassName = superClassName;
         this.interfaceNames = interfaceNames;
+        this.clazzFile = classFile;
+        this.interfaces = new ArrayList<>();
         this.methods = methods;
         this.fields = fields;
         this.bootstrapMethods = bootstrapMethods;
         this.constantPool = constantPool;
-        this.clazzLoader = clazzLoader;
+        this.clazzLoader = classLoader;
+        methods.forEach(it -> it.setClazz(this));
+    }
+
+    public Clazz(int accessFlags, String name, ClazzLoader classLoader, ClazzFile clazzFile) {
+        super(accessFlags, name, "");
+        this.superClassName = "java/lang/Object";
+        this.interfaceNames = new ArrayList<>();
+        this.interfaces = new ArrayList<>();
+        this.bootstrapMethods = null;
+        this.constantPool = null;
+        this.clazzLoader = classLoader;
         this.clazzFile = clazzFile;
-        this.superClass = superClass;
-        this.interfaces = interfaces;
-        this.stat = stat;
-        this.runtimeClass = runtimeClass;
+        this.methods = new ArrayList<>();
+        this.fields = new ArrayList<>();
+        this.stat = 2;
+    }
+
+    public Clazz(int accessFlags, String name, ClazzLoader classLoader) {
+        this(accessFlags, name, classLoader, null);
+    }
+
+    /**
+     * 获取类方法
+     */
+    public Method getMethod(String name, String descriptor) {
+        return this.getMethod(name, descriptor, true);
+    }
+
+    /**
+     * 获取类方法
+     *
+     * @param noAllDeclare 是否搜寻全部定义的方法，如果为false，将不下溯父类和接口实现
+     */
+    public Method getMethod(String name, String descriptor, boolean noAllDeclare) {
+        for (Method m : methods) {
+            if (Objects.equals(m.getName(), name) && Objects.equals(m.getDescriptor(), descriptor))
+                return m;
+        }
+//        return null;
+        if (!noAllDeclare) return null;
+
+        for (Clazz inter : this.interfaces) {
+            Method method = inter.getMethod(name, descriptor);
+            if (method != null)
+                return method;
+        }
+
+        if (this.superClass == null)
+            return null;
+
+        return this.superClass.getMethod(name, descriptor);
+    }
+
+    /**
+     * 获取类的初始化构造方法
+     */
+    public Method getClinitMethod() {
+        return this.getMethod("<clinit>", "()V");
+    }
+
+    /**
+     * 获取类的main方法
+     */
+    public Method getMainMethod() {
+        return this.getMethod("main", "([Ljava/lang/String;)V", false);
+    }
+
+    /**
+     * 获取类字段
+     */
+    public Field getField(String name, String descriptor) {
+        for (Field field : fields) {
+            if (Objects.equals(field.getName(), name) && Objects
+                    .equals(field.getDescriptor(), descriptor))
+                return field;
+        }
+        return null;
+    }
+
+    /**
+     * 获取类字段
+     */
+    public Field getField(String name) {
+        for (Field field : fields) {
+            if (Objects.equals(field.getName(), name))
+                return field;
+        }
+        return null;
+    }
+
+    /**
+     * 创建类实例
+     */
+    public Instance newInstance() {
+        List<Field> newFields = new ArrayList<>();
+        for (Field field : fields)
+            newFields.add(this.map(field));
+        Instance ins = new Instance(newFields, this);
+        if (this.superClass != null) {
+            ins.setSuperInstance(this.superClass.newInstance());
+        }
+        return ins;
+    }
+
+    public boolean instanceOf(String clazz) {
+        if (this.getName().equals(clazz))
+            return true;
+
+        if (this.superClass != null)
+            return this.superClass.instanceOf(clazz);
+
+        for (String interfaceName : this.interfaceNames) {
+            if (Objects.equals(interfaceName, clazz))
+                return true;
+        }
+
+        return false;
+    }
+
+    public void interfaceInit(Frame frame) {
+        List<Clazz> interfaces = new ArrayList<>();
+        for (String interfaceName : this.interfaceNames) {
+            Clazz tmp = TinyJVM.vm.getHeap().getClazz(interfaceName);
+
+            if (tmp == null)
+                tmp = frame.getMethod().getClazz().getClazzLoader().loadClazz(interfaceName);
+
+            interfaces.add(tmp);
+            tmp.interfaceInit(frame);
+
+            if (tmp.getStat() <= 0) {
+                Method cinit = tmp.getClinitMethod();
+
+                if (cinit == null)
+                    throw new IllegalStateException();
+
+                tmp.setStat(1);
+                TinyJVM.vm.execute(cinit);
+                tmp.setStat(2);
+            }
+        }
+        this.setInterfaces(interfaces);
     }
 
     public String getSuperClassName() {
@@ -104,23 +249,12 @@ public class Clazz extends BaseNametag {
         this.runtimeClass = runtimeClass;
     }
 
-    public Field getField(String fieldName, String fieldDescriptor) {
+    private Field map(Field source) {
+        if (source.isStatic())
+            return source;
+        final Field field = new Field(source.getAccessFlags(), source.getName(), source.getDescriptor());
+        field.init();
+        return field;
     }
 
-    public boolean instanceOf(String clazz) {
-
-    }
-
-    public Method getMethod(String s, String s1) {
-        return null;
-    }
-
-    public Instance newInstance() {
-    }
-
-    public Method getClinitMethod() {
-    }
-
-    public void interfaceInit(Frame frame) {
-    }
 }

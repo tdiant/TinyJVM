@@ -2,9 +2,9 @@ package net.tdiant.tinyjvm;
 
 import net.tdiant.tinyjvm.classes.loader.ClazzLoader;
 import net.tdiant.tinyjvm.natives.*;
-import net.tdiant.tinyjvm.runtime.Frame;
-import net.tdiant.tinyjvm.runtime.Method;
 import net.tdiant.tinyjvm.runtime.Thread;
+import net.tdiant.tinyjvm.runtime.*;
+import net.tdiant.tinyjvm.util.MeowUtils;
 
 public class VMMain {
 
@@ -16,10 +16,19 @@ public class VMMain {
         this.mainThread = new Thread(TinyJVM.args.getMaxThreadSize());
         this.heap = new TinyNativeHeap();
 
-        ClazzLoader clazzLoader = new ClazzLoader("vm_startup", )
+        ClazzLoader clazzLoader = new ClazzLoader("vm_startup", MeowUtils.getTempClazzSource());
 
         initNatives();
+        initPrimitiveClasses(clazzLoader);
 
+    }
+
+    public Thread getMainThread() {
+        return mainThread;
+    }
+
+    public TinyNativeHeap getHeap() {
+        return heap;
     }
 
     private void initNatives() {
@@ -32,12 +41,53 @@ public class VMMain {
 
     }
 
-    public Thread getMainThread() {
-        return mainThread;
-    }
+    private void initPrimitiveClasses(ClazzLoader clazzLoader) {
 
-    public TinyNativeHeap getHeap() {
-        return heap;
+        Clazz clz = clazzLoader.loadClazz("java/lang/Class");
+
+        for (Clazz cls : TinyJVM.vm.getHeap().getClasses()) {
+            if (cls.getRuntimeClass() == null) {
+                Instance obj = clz.newInstance();
+                cls.setRuntimeClass(obj);
+                obj.setMetaClass(cls);
+            }
+        }
+
+        // Basic Types
+        clazzLoader.loadPrimitiveClass("char");
+        clazzLoader.loadPrimitiveClass("boolean");
+        clazzLoader.loadPrimitiveClass("byte");
+        clazzLoader.loadPrimitiveClass("short");
+        clazzLoader.loadPrimitiveClass("int");
+        clazzLoader.loadPrimitiveClass("long");
+        clazzLoader.loadPrimitiveClass("float");
+        clazzLoader.loadPrimitiveClass("double");
+        clazzLoader.loadPrimitiveClass("void");
+
+        // String
+        clazzLoader.loadClazz("java/lang/String");
+
+        // Wrappers
+        clazzLoader.loadClazz("java/lang/Character");
+        clazzLoader.loadClazz("java/lang/Boolean");
+        clazzLoader.loadClazz("java/lang/Byte");
+        clazzLoader.loadClazz("java/lang/Short");
+        clazzLoader.loadClazz("java/lang/Integer");
+        clazzLoader.loadClazz("java/lang/Long");
+        clazzLoader.loadClazz("java/lang/Float");
+        clazzLoader.loadClazz("java/lang/Double");
+        clazzLoader.loadClazz("java/lang/Void");
+
+        // Basic Arrays
+        clazzLoader.loadPrimitiveClass("[B");
+        clazzLoader.loadPrimitiveClass("[C");
+        clazzLoader.loadPrimitiveClass("[Z");
+        clazzLoader.loadPrimitiveClass("[S");
+        clazzLoader.loadPrimitiveClass("[I");
+        clazzLoader.loadPrimitiveClass("[F");
+        clazzLoader.loadPrimitiveClass("[L");
+        clazzLoader.loadPrimitiveClass("[D");
+
     }
 
     public void execute(Method method) {
@@ -71,62 +121,17 @@ public class VMMain {
 
         Instance[] kargs = new Instance[args.length];
         for (int i = 0; i < args.length; i++) {
-            kargs[i] = Utils.str2Obj(args[i], frame.method.clazz.classLoader);
+            kargs[i] = Utils.str2Obj(args[i], frame.method.clazz.clazzLoader);
         }
         Class arrClazz = Heap.findClass("[Ljava/lang/String;");
         if (arrClazz == null) {
-            arrClazz = new Class(1, "[Ljava/lang/String;", method.clazz.classLoader, null);
+            arrClazz = new Class(1, "[Ljava/lang/String;", method.clazz.clazzLoader, null);
             Heap.registerClass(arrClazz.name, arrClazz);
         }
         InstanceArray array = new InstanceArray(arrClazz, kargs);
         frame.setRef(0, array);
 
         execute(frame);
-    }
-
-    public void loop(Thread thread) {
-        if (EnvHolder.debug) {
-            try {
-                System.out.println("正在初始化jdb...");
-                DebugContextHolder.scanner = new Scanner(System.in);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        do {
-            Frame frame = thread.topFrame();
-            int pc = frame.nextPc;
-
-            Instruction inst = frame.getInst();
-            if (inst == null) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(pc).append("\n");
-                sb.append("class: ").append(frame.method.clazz.name).append("\n");
-                sb.append("method: ").append(frame.method.name).append("\n");
-                sb.append("methodDescriptor: ").append(frame.method.descriptor).append("\n");
-                frame.method.instructionMap.forEach((key, val) -> {
-                    sb.append(key).append(" ").append(val.format()).append("\n");
-                });
-                String str = sb.toString();
-                System.err.println(str);
-                throw new IllegalStateException();
-            }
-            traceBefore(inst, frame);
-
-            frame.nextPc += inst.offset();
-            try {
-                inst.execute(frame);
-            } catch (Exception e) {
-                e.printStackTrace();
-
-                String name = frame.getCurrentMethodFullName();
-                String msg = name + "(" + frame.getCurrentSource() + ":" + frame.getCurrentLine() + ")";
-                System.out.println(msg);
-                throw new IllegalStateException();
-            }
-
-        } while (!thread.empty());
     }
 
     private void traceBefore(Instruction inst, Frame frame) {

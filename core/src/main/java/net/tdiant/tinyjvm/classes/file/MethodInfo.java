@@ -1,15 +1,23 @@
 package net.tdiant.tinyjvm.classes.file;
 
 import net.tdiant.tinyjvm.classes.file.attr.Attribute;
+import net.tdiant.tinyjvm.classes.file.attr.LineNumTableAttribute;
 
 import java.util.List;
 
+//method_info {
+//    u2             access_flags;
+//    u2             name_index;
+//    u2             descriptor_index;
+//    u2             attributes_count;
+//    attribute_info attributes[attributes_count];
+//    }
 public class MethodInfo {
 
-    private final int accessFlags;
-    private final String name;
-    private final String descriptor;
-    private final List<Attribute> attributes;
+    public final int accessFlags;
+    public final String name;
+    public final String descriptor;
+    public final List<Attribute> attributes;
 
     public MethodInfo(int accessFlags, String name, String descriptor, List<Attribute> attributes) {
         this.accessFlags = accessFlags;
@@ -18,19 +26,24 @@ public class MethodInfo {
         this.attributes = attributes;
     }
 
-    public int getAccessFlags() {
-        return accessFlags;
+    public Code getCode() {
+        for (Attribute attribute : attributes) {
+            if (attribute instanceof Code) {
+                return ((Code) attribute);
+            }
+        }
+        return null;
     }
 
-    public String getName() {
-        return name;
-    }
+    public LineNumTableAttribute getLineNumber() {
+        if (this.getCode() == null)
+            return null;
 
-    public String getDescriptor() {
-        return descriptor;
-    }
+        for (Attribute attribute : this.getCode().getAttributes()) {
+            if (attribute instanceof LineNumTableAttribute)
+                return ((LineNumTableAttribute) attribute);
+        }
 
-    public List<Attribute> getAttributes() {
-        return attributes;
+        return null;
     }
 }

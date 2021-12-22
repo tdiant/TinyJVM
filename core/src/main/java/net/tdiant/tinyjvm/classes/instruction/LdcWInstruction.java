@@ -28,16 +28,17 @@ public class LdcWInstruction extends Instruction {
                 frame.getOperandStack().push(new Slot((float) val));
                 break;
             case "Ljava/lang/String":
-                Clazz cls = TinyJVM.vm.getHeap().getClazz("java/lang/String");
-                if (cls == null)
-                    cls = frame.getMethod().getClazz().getClazzLoader().loadClazz("java/lang/String");
+                Clazz klass = TinyJVM.vm.getHeap().getClazz("java/lang/String");
+                if (klass == null)
+                    klass = frame.getMethod().getClazz().getClazzLoader().loadClazz("java/lang/String");
 
-                if (cls.getStat() <= 0) {
-                    cls.setStat(1);
-                    TinyJVM.vm.execute(cls.getMethod("<clinit>", "()V"));
-                    cls.setStat(2);
+                if (klass.getStat() <= 0) {
+                    klass.setStat(1);
+                    TinyJVM.vm.execute(klass.getMethod("<clinit>", "()V"));
+                    klass.setStat(2);
                 }
-                Instance object = cls.newInstance();
+
+                Instance object = klass.newInstance();
                 Field field = object.getField("value", "[C");
                 Clazz arrClazz = new Clazz(1, "[C", frame.getMethod().getClazz().getClazzLoader(), null);
 

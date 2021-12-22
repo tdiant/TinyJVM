@@ -2,6 +2,7 @@ package net.tdiant.tinyjvm.natives;
 
 import net.tdiant.tinyjvm.TinyJVM;
 import net.tdiant.tinyjvm.runtime.Clazz;
+import net.tdiant.tinyjvm.runtime.Field;
 import net.tdiant.tinyjvm.runtime.Instance;
 import net.tdiant.tinyjvm.runtime.PrimitiveArray;
 
@@ -27,8 +28,6 @@ public class JavaLangClass {
         TinyJVM.vm.getHeap().registerEmptyMethod("java/lang/Class_getDeclaredConstructors0_(Z)[Ljava/lang/reflect/Constructor;");
         TinyJVM.vm.getHeap().registerEmptyMethod("java/lang/Class_getDeclaredClasses0_()[Ljava/lang/Class;");
         TinyJVM.vm.getHeap().registerEmptyMethod("java/lang/Class_desiredAssertionStatus0_(Ljava/lang/Class;)Z");
-
-        Class
 
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_isInterface_()Z", frame -> {
             Clazz cls = ((Instance) frame.popRef()).getMetaClass();
@@ -189,5 +188,4 @@ public class JavaLangClass {
                     frame.pushRef(null);
                 });
     }
-}
 }
