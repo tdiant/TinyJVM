@@ -5,6 +5,7 @@ import net.tdiant.tinyjvm.classes.file.ClazzFile;
 import net.tdiant.tinyjvm.classes.loader.ClazzLoader;
 import net.tdiant.tinyjvm.runtime.*;
 
+import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +13,6 @@ import java.util.List;
 public class RuntimeUtils {
 
     public static final List<Character> METHOD_DESCRIPTOR_BASE = Arrays.asList('V', 'Z', 'B', 'C', 'S', 'I', 'J', 'F', 'D');
-
 
     public static void clinit(Clazz clazz) {
         if (clazz.stat >= ClazzFile.CLASS_INIT_NOW) return;

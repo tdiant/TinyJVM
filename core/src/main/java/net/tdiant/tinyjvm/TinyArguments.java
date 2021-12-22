@@ -6,11 +6,9 @@ import java.util.List;
 public class TinyArguments {
 
     private final String[] args;
-
-    private int maxThreadSize = 2048; // 调用栈大小
-
-    private String mainClass = null;
     private final List<String> classes = new ArrayList<>();
+    private int maxThreadSize = 2048; // 调用栈大小
+    private String mainClass = null;
 
     public TinyArguments(String[] args) {
         this.args = args;
@@ -45,7 +43,7 @@ public class TinyArguments {
 
     }
 
-    public String[] getArgs() {
+    public String[] getArguments() {
         return args;
     }
 

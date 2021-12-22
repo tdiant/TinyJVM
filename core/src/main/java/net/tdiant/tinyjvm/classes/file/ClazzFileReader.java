@@ -4,9 +4,15 @@ import net.tdiant.tinyjvm.classes.file.attr.*;
 import net.tdiant.tinyjvm.classes.file.constant.*;
 import net.tdiant.tinyjvm.classes.instruction.Instruction;
 import net.tdiant.tinyjvm.exception.ClassFileReaderException;
+import net.tdiant.tinyjvm.util.CodeByteArrayInputStream;
+import net.tdiant.tinyjvm.util.CodeDataInputStream;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ClazzFileReader {
@@ -22,6 +28,16 @@ public class ClazzFileReader {
     public ClazzFileReader(File file) throws IOException {
         this.file = file;
         this.in = new DataInputStream(new FileInputStream(file));
+    }
+
+    /**
+     * 类文件读取器
+     *
+     * @param in 输入流
+     */
+    public ClazzFileReader(DataInputStream in) throws IOException {
+        this.in = in;
+        this.file = null;
     }
 
     /**
@@ -49,11 +65,15 @@ public class ClazzFileReader {
         int fieldCnt = in.readUnsignedShort(); // 类字段数量
         List<FieldInfo> fields = readFields(fieldCnt, constantPool); // 类字段列表
 
+        System.out.println(fields);
+
         int methodCnt = in.readUnsignedShort(); // 方法数量
         List<MethodInfo> methods = readMethods(methodCnt, constantPool); // 方法列表
 
         int attributeCnt = in.readUnsignedShort(); // 类属性数量
         List<Attribute> attributes = readAttributes(attributeCnt, constantPool); // 类属性列表
+
+        in.close();
 
         return new ClazzFile(
                 classFileTag,
@@ -135,9 +155,10 @@ public class ClazzFileReader {
             pool.push(con);
 
             // 双精度需要占双位置
-            if (tag == ClazzFile.CONSTANT_DOUBLE || tag == ClazzFile.CONSTANT_LONG)
+            if (tag == ClazzFile.CONSTANT_DOUBLE || tag == ClazzFile.CONSTANT_LONG) {
                 pool.push(new EmptyConstantInfo());
-
+                i++;
+            }
         }
 
         return pool;
@@ -178,7 +199,15 @@ public class ClazzFileReader {
             int descriptorIdx = in.readUnsignedShort();
             int attributeCnt = in.readUnsignedShort();
 
-            //todo
+            List<Attribute> attributes = readAttributes(attributeCnt, pool);
+
+            ConstantInfo info = pool.get(nameIdx - 1);
+            String name = ((Utf8ConstantInfo) info).str();
+
+            String descriptor = ((Utf8ConstantInfo) pool.get(descriptorIdx - 1)).str();
+
+            FieldInfo fieldInfo = new FieldInfo(accessFlag, name, descriptor, attributes);
+            fields.add(fieldInfo);
 
         }
 
@@ -198,7 +227,11 @@ public class ClazzFileReader {
 
             String name = ((Utf8ConstantInfo) pool.get(nameIdx - 1)).str();
             String descriptor = ((Utf8ConstantInfo) pool.get(descriptorIdx - 1)).str();
+
+            System.out.println("loading code:: " + name + "::" + nameIdx + "::" + accessFlag);
+
             List<Attribute> attrs = readAttributes(attributesCount, pool);
+
 
             infos.add(new MethodInfo(
                     accessFlag,
@@ -221,6 +254,8 @@ public class ClazzFileReader {
             String attrName = ((Utf8ConstantInfo) pool.get(attrNameIdx - 1)).str();
             int attrLen = in.readInt();
 
+            System.out.println("  - arr name: " + attrName + " :: len: " + attrLen);
+
             Attribute attr = null;
 
             switch (attrName) {
@@ -233,9 +268,11 @@ public class ClazzFileReader {
                     int maxLocals = in.readUnsignedShort();
                     int codeLen = in.readInt();
 
+                    System.out.println("  -==-:: " + maxStackSize + "::" + maxLocals + "::" + codeLen);
+
                     byte[] codeBytes = new byte[codeLen];
                     for (int j = 0; j < codeLen; j++)
-                        codeBytes[i] = in.readByte();
+                        codeBytes[j] = in.readByte();
 
                     List<Instruction> instructions = readCodeByByte(codeBytes, pool);
 
@@ -304,14 +341,19 @@ public class ClazzFileReader {
     }
 
     public List<Instruction> readCodeByByte(byte[] bytes, ConstantPool pool) throws IOException {
+
+        System.out.println(Arrays.toString(bytes));
+
         List<Instruction> list = new ArrayList<>();
 
-        ByteArrayInputStream ba = new ByteArrayInputStream(bytes);
-        DataInputStream s = new DataInputStream(ba);
+        CodeByteArrayInputStream ba = new CodeByteArrayInputStream(bytes);
+        CodeDataInputStream s = new CodeDataInputStream(ba);
         while (s.available() > 0) {
             int op = s.readUnsignedByte(); // 操作
+            System.out.println(" ===::" + op);
 
             Instruction ins = new InstructionReader(op, ba, s, pool).read();
+            System.out.println("inst::" + ins.getClass().getName() + "::" + ins);
             if (ins == null) {
                 throw new ClassFileReaderException("ByteCodeReader", "Cannot transform instruction operation " + op + ".");
             }

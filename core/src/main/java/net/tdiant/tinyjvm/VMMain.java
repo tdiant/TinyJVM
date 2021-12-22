@@ -3,22 +3,22 @@ package net.tdiant.tinyjvm;
 import net.tdiant.tinyjvm.classes.file.ClazzFile;
 import net.tdiant.tinyjvm.classes.instruction.Instruction;
 import net.tdiant.tinyjvm.classes.loader.ClazzLoader;
+import net.tdiant.tinyjvm.classes.loader.ClazzSource;
 import net.tdiant.tinyjvm.natives.*;
 import net.tdiant.tinyjvm.runtime.Thread;
 import net.tdiant.tinyjvm.runtime.*;
-import net.tdiant.tinyjvm.util.MeowUtils;
 
 public class VMMain {
 
     private Thread mainThread;
     private TinyNativeHeap heap;
 
-    public void run() {
+    public void run(ClazzSource bootSource) {
 
         this.mainThread = new Thread(TinyJVM.args.getMaxThreadSize());
         this.heap = new TinyNativeHeap();
 
-        ClazzLoader clazzLoader = new ClazzLoader("vm_startup", MeowUtils.getTempClazzSource());
+        ClazzLoader clazzLoader = new ClazzLoader("vm_startup", bootSource);
 
         initNatives();
         initPrimitiveClasses(clazzLoader);
@@ -37,8 +37,8 @@ public class VMMain {
 
     private void initNatives() {
 
-        JavaLangObject.registerNatives();
         JavaLangClass.registerNatives();
+        JavaLangObject.registerNatives();
         JavaLangSystem.registerNatives();
         JavaLangFloat.registerNatives();
         JavaLangDouble.registerNatives();
@@ -96,30 +96,31 @@ public class VMMain {
 
     private void initSystemOut(ClazzLoader classLoader) {
         Clazz fdCls = classLoader.loadClazz("java/io/FileDescriptor");
-        Instance outFdObj = fdCls.newInstance();
-        Method fdInitMethod = fdCls.getMethod("<init>", "(I)V");
 
+        System.out.println(fdCls.getMethods());
+
+        Instance outFdObj = fdCls.newInstance();
+        Method fdInitMethod = fdCls.getMethod("<init>", "()V");
         Frame f1 = new Frame(fdInitMethod);
-        f1.getOperandStack().set(0, new Slot(outFdObj));
-        f1.getOperandStack().set(1, new Slot(1));
+        f1.getLocalVars().set(0, new Slot(outFdObj));
+        f1.getLocalVars().set(1, new Slot(1));
         execute(f1);
 
         Clazz fosCls = classLoader.loadClazz("java/io/FileOutputStream");
         Instance fosObj = fosCls.newInstance();
         Method fosInitMethod = fosCls.getMethod("<init>", "(Ljava/io/FileDescriptor;)V");
-
         Frame f2 = new Frame(fosInitMethod);
-        f2.getOperandStack().set(0, new Slot(fosObj));
-        f2.getOperandStack().set(1, new Slot(outFdObj));
+        f2.getLocalVars().set(0, new Slot(fosObj));
+        f2.getLocalVars().set(1, new Slot(outFdObj));
         execute(f2);
 
         Clazz psCls = classLoader.loadClazz("java/io/PrintStream");
         Instance psObj = psCls.newInstance();
         Method psInitMethod = psCls.getMethod("<init>", "(Ljava/io/OutputStream;Z)V");
         Frame frame = new Frame(psInitMethod);
-        f2.getOperandStack().set(0, new Slot(psObj));
-        f2.getOperandStack().set(1, new Slot(fosObj));
-        f2.getOperandStack().set(2, new Slot(1));
+        f2.getLocalVars().set(0, new Slot(psObj));
+        f2.getLocalVars().set(1, new Slot(fosObj));
+        f2.getLocalVars().set(2, new Slot(1));
         execute(frame);
 
         Clazz sysCls = classLoader.loadClazz("java/lang/System");
@@ -145,10 +146,11 @@ public class VMMain {
 
         do {
             Frame frame = mainThread.now();
-            frame.setPc(frame.getNextPc());
+//            frame.setPc(frame.getNextPc());
+            System.out.println(frame.getInstructions());
+            System.out.println(frame.getPc());
             Instruction instruction = frame.getInstructions().get(frame.getPc());
             frame.setNextPc(frame.getNextPc() + instruction.delta());
-
             instruction.run(frame);
         } while (newFrame.getStat() == ClazzFile.FAKE_FRAME);
     }

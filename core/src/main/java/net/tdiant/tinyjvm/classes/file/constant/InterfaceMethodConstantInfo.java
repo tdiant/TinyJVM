@@ -6,30 +6,9 @@ package net.tdiant.tinyjvm.classes.file.constant;
 //    u2 name_and_type_index;
 //}
 
-public class InterfaceMethodConstantInfo extends ConstantInfo {
-
-    private int classIndex; // 对应的类ConstantInfo的位置
-    private int nameAndTypeIndex; // 对应的NameAndTypeInfo的位置
+public class InterfaceMethodConstantInfo extends MethodConstantInfo {
 
     public InterfaceMethodConstantInfo(int tag, int classIndex, int nameAndTypeIndex) {
-        super(tag);
-        this.classIndex = classIndex;
-        this.nameAndTypeIndex = nameAndTypeIndex;
-    }
-
-    public int getClassIndex() {
-        return classIndex;
-    }
-
-    public void setClassIndex(int classIndex) {
-        this.classIndex = classIndex;
-    }
-
-    public int getNameAndTypeIndex() {
-        return nameAndTypeIndex;
-    }
-
-    public void setNameAndTypeIndex(int nameAndTypeIndex) {
-        this.nameAndTypeIndex = nameAndTypeIndex;
+        super(tag, classIndex, nameAndTypeIndex);
     }
 }

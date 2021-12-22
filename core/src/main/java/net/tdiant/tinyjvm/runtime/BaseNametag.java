@@ -1,5 +1,7 @@
 package net.tdiant.tinyjvm.runtime;
 
+import java.io.FileDescriptor;
+
 public class BaseNametag {
 
     private int accessFlags;
@@ -34,5 +36,14 @@ public class BaseNametag {
 
     public void setDescriptor(String descriptor) {
         this.descriptor = descriptor;
+    }
+
+    @Override
+    public String toString() {
+        return "BaseNametag{" +
+                "accessFlags=" + accessFlags +
+                ", name='" + name + '\'' +
+                ", descriptor='" + descriptor + '\'' +
+                '}';
     }
 }

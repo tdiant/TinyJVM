@@ -3,22 +3,24 @@ package net.tdiant.tinyjvm.classes.file;
 import net.tdiant.tinyjvm.classes.file.constant.*;
 import net.tdiant.tinyjvm.classes.instruction.*;
 import net.tdiant.tinyjvm.exception.InstructionReaderException;
-import net.tdiant.tinyjvm.util.StreamUtils;
+import net.tdiant.tinyjvm.util.CodeByteArrayInputStream;
+import net.tdiant.tinyjvm.util.CodeDataInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class InstructionReader {
 
     private final int op;
-    private final DataInputStream s;
-    private final ByteArrayInputStream ba;
+    private final CodeDataInputStream s;
+    private final CodeByteArrayInputStream ba;
     private final ConstantPool pool;
 
-    public InstructionReader(int op, ByteArrayInputStream ba, DataInputStream s, ConstantPool pool) {
+    public InstructionReader(int op, CodeByteArrayInputStream ba, CodeDataInputStream s, ConstantPool pool) {
         this.op = op;
         this.s = s;
         this.ba = ba;
@@ -136,7 +138,7 @@ public class InstructionReader {
             case 0x35:
                 return new SALoadInstruction();
             case 0x36:
-                return new IStoreInstruction(s.readUnsignedShort());
+                return new IStoreInstruction(s.readUnsignedByte());
             case 0x37:
                 return new LStoreInstruction(s.readUnsignedByte());
             case 0x38:
@@ -376,22 +378,83 @@ public class InstructionReader {
                 return new LReturnInstruction();
             case 0xb1:
                 return new ReturnInstruction();
+//            case 0xb2:
+//                return readGetterAndPutter(0);
+//            case 0xb3:
+//                return readGetterAndPutter(1);
+//            case 0xb4:
+//                return readGetterAndPutter(2);
+//            case 0xb5:
+//                return readGetterAndPutter(3);
+//            case 0xb6:
+//                return readGetterAndPutter(4);
+//            case 0xb7:
+//                return readGetterAndPutter(5);
+//            case 0xb8:
+//                return readGetterAndPutter(6);
+//            case 0xb9:
+//                return readGetterAndPutter(7);
+
             case 0xb2:
-                return readGetterAndPutter(0);
+                int gsIndex = s.readUnsignedShort();
+                return new GetStaticInstruction(
+                        pool.getClassNameByFieldDefIdx(gsIndex),
+                        pool.getMethodNameByFieldDefIdx(gsIndex),
+                        pool.getMethodTypeByFieldDefIdx(gsIndex)
+                );
             case 0xb3:
-                return readGetterAndPutter(1);
+                int psIndex = s.readUnsignedShort();
+                return new PutStaticInstruction(
+                        pool.getClassNameByFieldDefIdx(psIndex),
+                        pool.getMethodNameByFieldDefIdx(psIndex),
+                        pool.getMethodTypeByFieldDefIdx(psIndex)
+                );
             case 0xb4:
-                return readGetterAndPutter(2);
+                int gfIndex = s.readUnsignedShort();
+                return new GetFieldInstruction(
+                        pool.getClassNameByFieldDefIdx(gfIndex),
+                        pool.getMethodNameByFieldDefIdx(gfIndex),
+                        pool.getMethodTypeByFieldDefIdx(gfIndex)
+                );
             case 0xb5:
-                return readGetterAndPutter(3);
+                int pfIndex = s.readUnsignedShort();
+                return new PutFieldInstruction(
+                        pool.getClassNameByFieldDefIdx(pfIndex),
+                        pool.getMethodNameByFieldDefIdx(pfIndex),
+                        pool.getMethodTypeByFieldDefIdx(pfIndex)
+                );
             case 0xb6:
-                return readGetterAndPutter(4);
+                int ivIndex = s.readUnsignedShort();
+                return new InvokeVirtualInstruction(
+                        pool.getClassNameByMethodDefIdx(ivIndex),
+                        pool.getMethodNameByMethodDefIdx(ivIndex),
+                        pool.getMethodTypeByMethodDefIdx(ivIndex)
+                );
             case 0xb7:
-                return readGetterAndPutter(5);
+                int isIndex = s.readUnsignedShort();
+                return new InvokeSpecialInstruction(
+                        pool.getClassNameByMethodDefIdx(isIndex),
+                        pool.getMethodNameByMethodDefIdx(isIndex),
+                        pool.getMethodTypeByMethodDefIdx(isIndex)
+                );
             case 0xb8:
-                return readGetterAndPutter(6);
+                int mdIdx = s.readUnsignedShort();
+                return new InvokeStaticInstruction(
+                        pool.getClassNameByMethodDefIdx(mdIdx),
+                        pool.getMethodNameByMethodDefIdx(mdIdx),
+                        pool.getMethodTypeByMethodDefIdx(mdIdx)
+                );
             case 0xb9:
-                return readGetterAndPutter(7);
+                int iiIdx = s.readUnsignedShort();
+                System.out.println(iiIdx);
+                return new InvokeInterfaceInstruction(
+                        pool.getClassNameByIMethodDefIdx(iiIdx),
+                        pool.getMethodNameByIMethodDefIdx(iiIdx),
+                        pool.getMethodTypeByIMethodDefIdx(iiIdx),
+                        s.readUnsignedByte(),
+                        s.readUnsignedByte()
+                );
+
 //            case 0xba:
 //                return readInvokeDynamic();
             case 0xbb:
@@ -406,6 +469,10 @@ public class InstructionReader {
                 return new AThrowInstruction();
             case 0xc1:
                 return new InstanceOfInstruction(pool.getClassName(s.readUnsignedShort()));
+            case 0xc2:
+                return new MonitorEnterInstruction();
+            case 0xc3:
+                return new MonitorExitInstruction();
             case 0xc4:
                 switch (s.readUnsignedByte()) {
                     case 0x15:
@@ -440,11 +507,13 @@ public class InstructionReader {
             case 0xc8:
                 return new GotoWInstruction(s.readInt());
 
+            case 0xc0:
+                return new TodoInstruction("checkcast", Arrays.asList(
+                        s.readUnsignedShort()
+                ));
+
             case 0xa8:
             case 0xa9:
-            case 0xc0:
-            case 0xc2:
-            case 0xc3:
             case 0xc5:
             case 0xc9:
             default:
@@ -479,6 +548,8 @@ public class InstructionReader {
                 return new LdcInstruction("I", ((IntegerConstantInfo) info).val());
             case ClazzFile.CONSTANT_FLOAT:
                 return new LdcInstruction("F", ((FloatConstantInfo) info).val());
+            case ClazzFile.CONSTANT_CLASS:
+                return new LdcInstruction("L", ((Utf8ConstantInfo) pool.get(((ClassConstantInfo) info).getNameIndex() - 1)).str());
             default:
                 throw new InstructionReaderException();
         }
@@ -518,7 +589,7 @@ public class InstructionReader {
 
     private LookupSwitchInstruction readLookupSwitch() throws IOException {
         int lsOffset = 1;
-        int lsPadding = StreamUtils.readPadding(ba);
+        int lsPadding = s.readPadding();
         lsOffset += lsPadding;
 
         int lsDef = s.readInt();
@@ -596,28 +667,8 @@ public class InstructionReader {
         }
     }
 
-    private static class ClassNameDescriptionUnion {
-        public final String className;
-        public final String name;
-        public final String descriptor;
-
-        public ClassNameDescriptionUnion(String className, String name, String descriptor) {
-            this.className = className;
-            this.name = name;
-            this.descriptor = descriptor;
-        }
-
-        public static ClassNameDescriptionUnion of(int idx, ConstantPool pool) {
-            FieldConstantInfo info = ((FieldConstantInfo) pool.get(idx - 1));
-            NameAndTypeConstantInfo nameAndTypeConstantInfo = ((NameAndTypeConstantInfo) pool.get(info.getNameAndTypeIndex()));
-
-            String className = ((Utf8ConstantInfo) pool.get(info.getClassIndex() - 1)).str();
-            String name = ((Utf8ConstantInfo) pool.get(nameAndTypeConstantInfo.getNameIndex() - 1)).str();
-            String descriptor = ((Utf8ConstantInfo) pool.get(nameAndTypeConstantInfo.getDescriptorIndex() - 1)).str();
-
-            return new ClassNameDescriptionUnion(className, name, descriptor);
-        }
-
+    public int getOperation() {
+        return op;
     }
 
 //    public InvokeDynamicInstruction readInvokeDynamic() throws IOException {
@@ -633,10 +684,6 @@ public class InstructionReader {
 //        );
 //    }
 
-    public int getOperation() {
-        return op;
-    }
-
     public DataInputStream getDataInputStream() {
         return s;
     }
@@ -647,5 +694,30 @@ public class InstructionReader {
 
     public ConstantPool getConstantPool() {
         return pool;
+    }
+
+    private static class ClassNameDescriptionUnion {
+        public final String className;
+        public final String name;
+        public final String descriptor;
+
+        public ClassNameDescriptionUnion(String className, String name, String descriptor) {
+            this.className = className;
+            this.name = name;
+            this.descriptor = descriptor;
+        }
+
+        public static ClassNameDescriptionUnion of(int idx, ConstantPool pool) {
+            System.out.println(idx);
+            FieldConstantInfo info = ((FieldConstantInfo) pool.get(idx - 1));
+            NameAndTypeConstantInfo nameAndTypeConstantInfo = ((NameAndTypeConstantInfo) pool.get(info.getNameAndTypeIndex()));
+
+            String className = ((Utf8ConstantInfo) pool.get(info.getClassIndex() - 1)).str();
+            String name = ((Utf8ConstantInfo) pool.get(nameAndTypeConstantInfo.getNameIndex() - 1)).str();
+            String descriptor = ((Utf8ConstantInfo) pool.get(nameAndTypeConstantInfo.getDescriptorIndex() - 1)).str();
+
+            return new ClassNameDescriptionUnion(className, name, descriptor);
+        }
+
     }
 }

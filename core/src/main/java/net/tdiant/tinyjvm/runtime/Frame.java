@@ -28,6 +28,7 @@ public class Frame {
         this.localVars = new LocalVariableTable(method.getMaxLocals());
         this.operandStack = new OperandStack(method.getMaxStacks());
         this.thread = TinyJVM.vm.getMainThread(); //todo 不支持多线程
+        System.out.println(method.getInstructions());
         this.instructions = new HashMap<>(method.getInstructions());
     }
 

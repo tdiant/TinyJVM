@@ -23,7 +23,7 @@ public class DoubleConstantInfo extends ConstantInfo {
         this.bytes = bytes;
     }
 
-    public double val(){
+    public double val() {
         return bytes;
     }
 }

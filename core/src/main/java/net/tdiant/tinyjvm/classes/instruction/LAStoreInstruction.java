@@ -1,7 +1,7 @@
 package net.tdiant.tinyjvm.classes.instruction;
 
-import net.tdiant.tinyjvm.runtime.PrimitiveArray;
 import net.tdiant.tinyjvm.runtime.Frame;
+import net.tdiant.tinyjvm.runtime.PrimitiveArray;
 
 public class LAStoreInstruction extends Instruction {
 

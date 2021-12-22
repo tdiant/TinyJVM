@@ -3,11 +3,10 @@ package net.tdiant.tinyjvm.runtime;
 import net.tdiant.tinyjvm.classes.file.ExceptionInfo;
 import net.tdiant.tinyjvm.classes.file.attr.LineNumTableAttribute;
 import net.tdiant.tinyjvm.classes.instruction.Instruction;
+import net.tdiant.tinyjvm.classes.instruction.ReturnInstruction;
 import net.tdiant.tinyjvm.util.RuntimeUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * 方法
@@ -26,9 +25,13 @@ public class Method extends BaseNametag {
         super(accessFlags, name, descriptor);
         this.maxStacks = maxStacks;
         this.maxLocals = maxLocals;
-        this.instructions = instructions;
-        this.exceptionInfos = exceptionInfos;
-        this.lineNumAttr = lineNumAttr;
+        this.instructions = instructions == null ? new HashMap<>() : instructions;
+        this.exceptionInfos = exceptionInfos == null ? new ArrayList<>() : exceptionInfos;
+        this.lineNumAttr = lineNumAttr == null ? new LineNumTableAttribute(new LineNumTableAttribute.Line[]{}) : lineNumAttr;
+
+        if (this.instructions.size()<=0) {
+            this.instructions.put(0,new ReturnInstruction());
+        }
     }
 
     /**
@@ -144,5 +147,17 @@ public class Method extends BaseNametag {
         this.clazz = clazz;
     }
 
-
+    @Override
+    public String toString() {
+        return "Method{" +
+                "name=" + this.getName() +
+                ", descriptor=" + this.getDescriptor() +
+                ", maxStacks=" + maxStacks +
+                ", maxLocals=" + maxLocals +
+                ", instructions=" + instructions +
+                ", exceptionInfos=" + exceptionInfos +
+                ", lineNumAttr=" + lineNumAttr +
+                ", clazz=" + clazz +
+                '}';
+    }
 }

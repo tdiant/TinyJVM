@@ -60,20 +60,20 @@ public class Instance {
         return superInstance;
     }
 
-    public Clazz getMetaClass() {
-        return metaClass;
-    }
-
-    public Object getExtra() {
-        return extra;
-    }
-
     public void setSuperInstance(Instance superInstance) {
         this.superInstance = superInstance;
     }
 
+    public Clazz getMetaClass() {
+        return metaClass;
+    }
+
     public void setMetaClass(Clazz metaClass) {
         this.metaClass = metaClass;
+    }
+
+    public Object getExtra() {
+        return extra;
     }
 
     public void setExtra(Object extra) {

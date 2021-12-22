@@ -63,7 +63,7 @@ public class ClazzFile {
     private int attributeCnt; // 类属性数量
     private List<Attribute> attributes; // 类属性列表
 
-    private ClazzSource source;
+    private String source = "<runtime>";
 
     public ClazzFile(int classFileTag, int minorVer, int majorVer, int constantPoolSize, ConstantPool constantPool, int accessFlags, int thisClass, int superClass, int interfaceCnt, List<InterfaceInfo> interfaceInfos, int fieldCnt, List<FieldInfo> fields, int methodCnt, List<MethodInfo> methods, int attributeCnt, List<Attribute> attributes) {
         this.classFileTag = classFileTag;
@@ -228,11 +228,11 @@ public class ClazzFile {
         this.attributes = attributes;
     }
 
-    public ClazzSource getSource() {
+    public String getSource() {
         return source;
     }
 
-    public void setSource(ClazzSource source) {
+    public void setSource(String source) {
         this.source = source;
     }
 }

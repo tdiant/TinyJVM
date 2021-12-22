@@ -3,8 +3,6 @@ package net.tdiant.tinyjvm.classes.loader;
 import net.tdiant.tinyjvm.TinyJVM;
 import net.tdiant.tinyjvm.classes.file.*;
 import net.tdiant.tinyjvm.classes.file.attr.BootstrapMethodsAttribute;
-import net.tdiant.tinyjvm.classes.file.constant.ClassConstantInfo;
-import net.tdiant.tinyjvm.classes.file.constant.Utf8ConstantInfo;
 import net.tdiant.tinyjvm.runtime.*;
 
 import java.util.ArrayList;
@@ -91,8 +89,9 @@ public class ClazzLoader {
         int scIdx = clzFile.getSuperClass();
         String superClassName = null;
         if (scIdx != 0) {
-            int nameIdx = ((ClassConstantInfo) clzFile.getConstantPool().get(scIdx)).getNameIndex();
-            superClassName = ((Utf8ConstantInfo) clzFile.getConstantPool().get(nameIdx - 1)).str();
+            superClassName=clzFile.getConstantPool().getClassName(scIdx);
+//            int nameIdx = ((ClassConstantInfo) clzFile.getConstantPool().get(scIdx)).getNameIndex();
+//            superClassName = ((Utf8ConstantInfo) clzFile.getConstantPool().get(nameIdx - 1)).str();
         }
 
         List<String> interfaceNames = new ArrayList<>();

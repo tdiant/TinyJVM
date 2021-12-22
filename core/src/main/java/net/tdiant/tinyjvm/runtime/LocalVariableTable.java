@@ -5,7 +5,7 @@ public class LocalVariableTable {
     private final Slot[] slots;
 
     public LocalVariableTable(int size) {
-        slots = new Slot[size * 2];
+        slots = new Slot[size * 2+5];
     }
 
     public Slot get(int idx) {

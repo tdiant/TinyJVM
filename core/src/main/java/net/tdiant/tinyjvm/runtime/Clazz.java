@@ -23,11 +23,9 @@ public class Clazz extends BaseNametag {
     private final ConstantPool constantPool;
     private final ClazzLoader clazzLoader;
     private final ClazzFile clazzFile;
-
+    public int stat = 0;
     private Clazz superClass;
     private List<Clazz> interfaces;
-    public int stat = 0;
-
     private Instance runtimeClass;
 
     public Clazz(int accessFlags, String name, String superClassName, List<String> interfaceNames, List<Method> methods, List<Field> fields, BootstrapMethodsAttribute bootstrapMethods, ConstantPool constantPool, ClazzLoader classLoader, ClazzFile classFile) {
@@ -163,6 +161,7 @@ public class Clazz extends BaseNametag {
     public boolean isInterface() {
         return (getAccessFlags() & 0x0200) != 0;
     }
+
     public boolean isPrimitive() {
         return (getAccessFlags() & 0x1000) != 0;
     }
