@@ -1,7 +1,6 @@
 package net.tdiant.tinyjvm.classes.instruction;
 
 import net.tdiant.tinyjvm.runtime.Frame;
-import net.tdiant.tinyjvm.runtime.Slot;
 
 public class SiPushInstruction extends Instruction {
 
@@ -17,7 +16,7 @@ public class SiPushInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        frame.getOperandStack().push(new Slot(num));
+        frame.getOperandStack().pushInt(num);
     }
 
     @Override

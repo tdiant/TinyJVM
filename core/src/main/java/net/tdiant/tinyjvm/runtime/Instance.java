@@ -39,12 +39,12 @@ public class Instance {
         return this.superInstance.getField(name, descriptor);
     }
 
-    public void setField(String name, String descriptor, Slot val) {
+    public void setField(String name, String descriptor, UnionSlot val) {
         Field field = getField(name, descriptor);
         this.setField(field, val);
     }
 
-    public void setField(Field field, Slot val) {
+    public void setField(Field field, UnionSlot val) {
         field.setVal(val);
     }
 
@@ -78,5 +78,13 @@ public class Instance {
 
     public void setExtra(Object extra) {
         this.extra = extra;
+    }
+
+    @Override
+    public String toString() {
+        return "Instance{" +
+//                "fields=" + fields +
+                ", clazz=" + clazz.getName() +
+                '}';
     }
 }

@@ -17,7 +17,7 @@ public class IfNeInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        int x = frame.getOperandStack().pop().getInt();
+        int x = frame.getOperandStack().popInt();
         if (x != 0) {
             frame.setNextPc(frame.getPc() + idx);
         }

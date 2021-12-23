@@ -7,9 +7,9 @@ public class LAStoreInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        long num = frame.getOperandStack().pop().getLong();
-        int idx = frame.getOperandStack().pop().getInt();
-        PrimitiveArray arr = (PrimitiveArray) frame.getOperandStack().pop().getInstance();
+        long num = frame.getOperandStack().popLong();
+        int idx = frame.getOperandStack().popInt();
+        PrimitiveArray arr = (PrimitiveArray) frame.getOperandStack().popRef();
         arr.longs[idx] = num;
     }
 

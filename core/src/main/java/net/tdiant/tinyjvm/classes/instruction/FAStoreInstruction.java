@@ -7,9 +7,9 @@ public class FAStoreInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        float num = frame.getOperandStack().pop().getFloat();
-        int idx = frame.getOperandStack().pop().getInt();
-        PrimitiveArray arr = (PrimitiveArray) frame.getOperandStack().pop().getInstance();
+        float num = frame.getOperandStack().popFloat();
+        int idx = frame.getOperandStack().popInt();
+        PrimitiveArray arr = (PrimitiveArray) frame.getOperandStack().popRef();
         arr.floats[idx] = num;
     }
 

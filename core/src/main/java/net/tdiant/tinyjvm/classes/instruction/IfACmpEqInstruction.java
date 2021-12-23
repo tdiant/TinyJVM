@@ -17,8 +17,8 @@ public class IfACmpEqInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        Object a = frame.getOperandStack().pop().getInstance();
-        Object b = frame.getOperandStack().pop().getInstance();
+        Object a = frame.getOperandStack().popRef();
+        Object b = frame.getOperandStack().popRef();
         if (a == b) {
             frame.setNextPc(frame.getPc() + idx);
         }

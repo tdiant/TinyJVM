@@ -1,14 +1,13 @@
 package net.tdiant.tinyjvm.classes.instruction;
 
 import net.tdiant.tinyjvm.runtime.Frame;
-import net.tdiant.tinyjvm.runtime.Slot;
 
 public class FAddInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
-        float a = frame.getOperandStack().pop().getFloat();
-        float b = frame.getOperandStack().pop().getFloat();
-        frame.getOperandStack().push(new Slot(a + b));
+        float a = frame.getOperandStack().popFloat();
+        float b = frame.getOperandStack().popFloat();
+        frame.getOperandStack().pushFloat(a + b);
     }
 
     @Override

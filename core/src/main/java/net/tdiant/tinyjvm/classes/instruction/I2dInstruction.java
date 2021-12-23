@@ -1,13 +1,12 @@
 package net.tdiant.tinyjvm.classes.instruction;
 
 import net.tdiant.tinyjvm.runtime.Frame;
-import net.tdiant.tinyjvm.runtime.Slot;
 
 public class I2dInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
-        long x = frame.getOperandStack().pop().getLong();
-        frame.getOperandStack().push(new Slot((double) x));
+        long x = frame.getOperandStack().popLong();
+        frame.getOperandStack().pushDouble((double) x);
     }
 
     @Override

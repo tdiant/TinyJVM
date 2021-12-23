@@ -14,11 +14,11 @@ public class JavaLangObject {
         TinyJVM.vm.getHeap().registerEmptyMethod("java/lang/Object_clone_()Ljava/lang/Object;"); //todo not support yet
 
         TinyJVM.vm.getHeap().registerMethod("java/lang/Object_getClass_()Ljava/lang/Class;", (frame) -> {
-            Instance val = frame.getOperandStack().pop().getInstance();
+            Instance val = frame.getOperandStack().popRef();
             frame.getOperandStack().push(new Slot(val.getClazz().getRuntimeClass()));
         });
         TinyJVM.vm.getHeap().registerMethod("java/lang/Object_hashCode_()I", (frame) -> {
-            int val = frame.getOperandStack().pop().getInstance().hashCode();
+            int val = frame.getOperandStack().popRef().hashCode();
             frame.getOperandStack().push(new Slot(val));
         });
 

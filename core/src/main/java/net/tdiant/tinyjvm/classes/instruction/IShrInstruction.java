@@ -6,8 +6,8 @@ import net.tdiant.tinyjvm.runtime.Slot;
 public class IShrInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
-        int a = frame.getOperandStack().pop().getInt();
-        int b = frame.getOperandStack().pop().getInt();
+        int a = frame.getOperandStack().popInt();
+        int b = frame.getOperandStack().popInt();
         //An int result is calculated by shifting value1 left by s bit positions,
         //where s is the value of the low 5 bits of value2.
         frame.getOperandStack().push(new Slot(

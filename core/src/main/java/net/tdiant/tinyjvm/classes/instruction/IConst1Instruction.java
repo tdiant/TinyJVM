@@ -6,7 +6,7 @@ import net.tdiant.tinyjvm.runtime.Slot;
 public class IConst1Instruction extends Instruction {
     @Override
     public void run(Frame frame) {
-        frame.getOperandStack().push(new Slot(1));
+        frame.getOperandStack().pushInt(1);
     }
 
     @Override

@@ -1,13 +1,12 @@
 package net.tdiant.tinyjvm.classes.instruction;
 
 import net.tdiant.tinyjvm.runtime.Frame;
-import net.tdiant.tinyjvm.runtime.Slot;
 
 public class L2iInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
-        long x = frame.getOperandStack().pop().getLong();
-        frame.getOperandStack().push(new Slot((int) x));
+        long x = frame.getOperandStack().popLong();
+        frame.getOperandStack().pushInt((int) x);
     }
 
     @Override

@@ -7,6 +7,8 @@ import net.tdiant.tinyjvm.runtime.Method;
 import net.tdiant.tinyjvm.runtime.NativeMethod;
 import net.tdiant.tinyjvm.util.RuntimeUtils;
 
+import java.nio.charset.Charset;
+
 public class InvokeSpecialInstruction extends Instruction {
 
     public final String clazz;
@@ -34,6 +36,7 @@ public class InvokeSpecialInstruction extends Instruction {
 
         Clazz clz = TinyJVM.vm.getHeap().getClazz(clazz);
         if (clz == null) {
+
             throw new IllegalStateException();
         }
 
@@ -47,6 +50,6 @@ public class InvokeSpecialInstruction extends Instruction {
 
     @Override
     public String toString() {
-        return "invokespecail " + clazz + " " + methodName + " " + methodDescriptor;
+        return "invokespecial " + clazz + " " + methodName + " " + methodDescriptor;
     }
 }

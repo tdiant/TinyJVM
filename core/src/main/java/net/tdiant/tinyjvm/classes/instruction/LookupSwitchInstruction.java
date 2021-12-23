@@ -25,7 +25,7 @@ public class LookupSwitchInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        Integer tmp = frame.getOperandStack().pop().getInt();
+        Integer tmp = frame.getOperandStack().popInt();
         Integer jump = table.getOrDefault(tmp, def);
         frame.setNextPc(frame.getPc() + jump);
     }

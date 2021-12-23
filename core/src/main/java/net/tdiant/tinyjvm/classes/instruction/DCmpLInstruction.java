@@ -6,8 +6,8 @@ import net.tdiant.tinyjvm.runtime.Slot;
 public class DCmpLInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
-        double a = frame.getOperandStack().pop().getDouble();
-        double b = frame.getOperandStack().pop().getDouble();
+        double a = frame.getOperandStack().popDouble();
+        double b = frame.getOperandStack().popDouble();
         if (Double.isNaN(a) || Double.isNaN(b)) {
             frame.getOperandStack().push(new Slot(-1)); //Nan push -1
             return;

@@ -1,7 +1,6 @@
 package net.tdiant.tinyjvm.classes.instruction;
 
 import net.tdiant.tinyjvm.runtime.Frame;
-import net.tdiant.tinyjvm.runtime.Slot;
 
 public class Ldc2WInstruction extends Instruction {
 
@@ -29,9 +28,9 @@ public class Ldc2WInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
         if (tag) {
-            frame.getOperandStack().push(new Slot(b));
+            frame.getOperandStack().pushDouble(b);
         } else {
-            frame.getOperandStack().push(new Slot(a));
+            frame.getOperandStack().pushLong(a);
         }
     }
 

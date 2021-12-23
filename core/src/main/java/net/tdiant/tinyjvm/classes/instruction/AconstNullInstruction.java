@@ -6,10 +6,11 @@ public class AconstNullInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
+        frame.getOperandStack().pushRef(null);
     }
 
     @Override
     public String toString() {
-        return null;
+        return "aconstnull";
     }
 }

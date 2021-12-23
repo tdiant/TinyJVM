@@ -1,7 +1,6 @@
 package net.tdiant.tinyjvm.classes.instruction;
 
 import net.tdiant.tinyjvm.runtime.Frame;
-import net.tdiant.tinyjvm.runtime.Slot;
 
 public class FStoreInstruction extends Instruction {
 
@@ -18,9 +17,9 @@ public class FStoreInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        frame.getLocalVars().set(idx, new Slot(
-                frame.getOperandStack().pop().getFloat()
-        ));
+        frame.getLocalVars().setFloat(idx,
+                frame.getOperandStack().popFloat()
+        );
     }
 
     @Override

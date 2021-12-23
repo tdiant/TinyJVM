@@ -23,7 +23,7 @@ public class ILoadInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
         frame.getOperandStack().push(new Slot(
-                frame.getLocalVars().get(idx).getInt()
+                frame.getLocalVars().getInt(idx)
         ));
     }
 

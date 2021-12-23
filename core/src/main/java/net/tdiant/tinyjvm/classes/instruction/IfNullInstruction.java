@@ -17,7 +17,7 @@ public class IfNullInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        if (frame.getOperandStack().pop().getInstance() == null) {
+        if (frame.getOperandStack().popRef() == null) {
             frame.setNextPc(frame.getPc() + idx);
         }
     }

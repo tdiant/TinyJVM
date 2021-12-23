@@ -7,8 +7,8 @@ public class IDivInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        int a = frame.getOperandStack().pop().getInt();
-        int b = frame.getOperandStack().pop().getInt();
+        int a = frame.getOperandStack().popInt();
+        int b = frame.getOperandStack().popInt();
         if (a == 0) throw new NumberFormatException();
         frame.getOperandStack().push(new Slot(b / a));
     }

@@ -19,6 +19,12 @@ public class NewInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
+
+        if (clazz.startsWith("java/lang/Thread")) {
+            frame.getOperandStack().pushRef(null);
+            return;
+        }
+
         Clazz cls = TinyJVM.vm.getHeap().getClazz(clazz);
 
         if (cls == null) {
@@ -49,7 +55,7 @@ public class NewInstruction extends Instruction {
         }
 
         Instance obj = cls.newInstance();
-        frame.getOperandStack().push(new Slot(obj));
+        frame.getOperandStack().pushRef(obj);
     }
 
     @Override

@@ -7,9 +7,9 @@ public class DAStoreInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        double num = frame.getOperandStack().pop().getDouble();
-        int idx = frame.getOperandStack().pop().getInt();
-        PrimitiveArray arr = (PrimitiveArray) frame.getOperandStack().pop().getInstance();
+        double num = frame.getOperandStack().popDouble();
+        int idx = frame.getOperandStack().popInt();
+        PrimitiveArray arr = (PrimitiveArray) frame.getOperandStack().popRef();
         arr.doubles[idx] = num;
     }
 

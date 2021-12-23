@@ -5,7 +5,6 @@ import net.tdiant.tinyjvm.classes.file.ClazzFile;
 import net.tdiant.tinyjvm.classes.loader.ClazzLoader;
 import net.tdiant.tinyjvm.runtime.*;
 
-import java.io.FileDescriptor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -50,7 +49,7 @@ public class RuntimeUtils {
             arr.ints[i] = chars[i];
         }
 
-        field.setVal(new Slot(arr));
+        field.setVal(UnionSlot.of(arr));
         return object;
     }
 
@@ -63,7 +62,11 @@ public class RuntimeUtils {
 
         if (method.isNative()) {
             String key = method.nativeMethodKey();
+            System.out.println(key);
             NativeMethod nm = TinyJVM.vm.getHeap().getMethod(key);
+
+            System.out.println(TinyJVM.vm.getHeap().getNativeMethodNames());
+
             if (nm == null)
                 throw new IllegalStateException("not found native method: " + key);
 
@@ -122,7 +125,7 @@ public class RuntimeUtils {
         if (!nameObj.getClazz().getName().equals("java/lang/String"))
             throw new IllegalStateException();
 
-        PrimitiveArray pa = ((PrimitiveArray) nameObj.getField("value", "[C").getVal().getInstance());
+        PrimitiveArray pa = ((PrimitiveArray) nameObj.getField("value", "[C").getVal().getRef());
         char[] chars = new char[pa.getLength()];
         for (int i = 0; i < pa.getLength(); i++)
             chars[i] = (char) pa.ints[i];
@@ -133,4 +136,31 @@ public class RuntimeUtils {
     public static String nativeMethodKey(String clazzName, String methodName, String methodDescriptor) {
         return clazzName + "_" + methodName + "_" + methodDescriptor;
     }
+
+    public static void doReturn(int slotSize) {
+        Frame old = TinyJVM.vm.getMainThread().pop();
+
+        if (old.getStat() == ClazzFile.FAKE_FRAME)
+            old.setStat(ClazzFile.FAKE_FRAME_END);
+
+        if (slotSize == 0)
+            return;
+
+        Frame now = TinyJVM.vm.getMainThread().now();
+        if (slotSize == 1) {
+            now.getOperandStack().push(old.getOperandStack().pop());
+            return;
+        }
+
+        if (slotSize == 2) {
+            Slot v2 = old.getOperandStack().pop();
+            Slot v1 = old.getOperandStack().pop();
+            now.getOperandStack().push(v1);
+            now.getOperandStack().push(v2);
+            return;
+        }
+
+        throw new IllegalStateException();
+    }
+
 }

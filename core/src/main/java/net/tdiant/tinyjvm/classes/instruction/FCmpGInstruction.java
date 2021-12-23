@@ -6,8 +6,8 @@ import net.tdiant.tinyjvm.runtime.Slot;
 public class FCmpGInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
-        float a = frame.getOperandStack().pop().getFloat();
-        float b = frame.getOperandStack().pop().getFloat();
+        float a = frame.getOperandStack().popFloat();
+        float b = frame.getOperandStack().popFloat();
         if (Float.isNaN(a) || Float.isNaN(b)) {
             frame.getOperandStack().push(new Slot(1)); //Nan push 1
             return;

@@ -6,9 +6,9 @@ import net.tdiant.tinyjvm.runtime.Slot;
 public class ISubInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
-        int a = frame.getOperandStack().pop().getInt();
-        int b = frame.getOperandStack().pop().getInt();
-        frame.getOperandStack().push(new Slot(a - b));
+        int a = frame.getOperandStack().popInt();
+        int b = frame.getOperandStack().popInt();
+        frame.getOperandStack().push(new Slot(b - a));
     }
 
     @Override

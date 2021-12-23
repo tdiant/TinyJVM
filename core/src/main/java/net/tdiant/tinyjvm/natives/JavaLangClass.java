@@ -30,28 +30,28 @@ public class JavaLangClass {
         TinyJVM.vm.getHeap().registerEmptyMethod("java/lang/Class_desiredAssertionStatus0_(Ljava/lang/Class;)Z");
 
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_isInterface_()Z", frame -> {
-            Clazz cls = frame.getOperandStack().pop().getInstance().getMetaClass();
-            frame.getOperandStack().push(new Slot(cls.isInterface() ? 1 : 0));
+            Clazz cls = frame.getOperandStack().popRef().getMetaClass();
+            frame.getOperandStack().pushInt(cls.isInterface() ? 1 : 0);
         });
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_isArray_()Z", frame -> {
-            Clazz metaClass = frame.getOperandStack().pop().getInstance().getMetaClass();
-            frame.getOperandStack().push(new Slot(metaClass.getName().startsWith("[") ? 1 : 0));
+            Clazz metaClass = frame.getOperandStack().popRef().getMetaClass();
+            frame.getOperandStack().pushInt(metaClass.getName().startsWith("[") ? 1 : 0);
         });
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_isPrimitive_()Z", frame -> {
-            Clazz cls = frame.getOperandStack().pop().getInstance().getMetaClass();
-            frame.getOperandStack().push(new Slot(cls.isPrimitive() ? 1 : 0));
+            Clazz cls = frame.getOperandStack().popRef().getMetaClass();
+            frame.getOperandStack().pushInt(cls.isPrimitive() ? 1 : 0);
         });
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_getSuperclass_()Ljava/lang/Class;", frame -> {
-            Clazz superClass = frame.getOperandStack().pop().getInstance().getMetaClass().getSuperClass();
+            Clazz superClass = frame.getOperandStack().popRef().getMetaClass().getSuperClass();
             if (superClass == null) {
-                frame.getOperandStack().push(new Slot((Instance) null));
+                frame.getOperandStack().pushRef((Instance) null);
                 return;
             }
-            frame.getOperandStack().push(new Slot(superClass.getRuntimeClass()));
+            frame.getOperandStack().pushRef(superClass.getRuntimeClass());
         });
 
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_getName0_()Ljava/lang/String;", frame -> {
-            Instance obj = frame.getOperandStack().pop().getInstance();
+            Instance obj = frame.getOperandStack().popRef();
             String name = obj.getMetaClass().getName();
             Clazz strClazz = TinyJVM.vm.getHeap().getClazz("java/lang/String");
             Instance nameObj = strClazz.newInstance();
@@ -61,16 +61,16 @@ public class JavaLangClass {
             for (int i = 0; i < chars.length; i++)
                 array.ints[i] = chars[i];
 
-            nameObj.setField("value", "[C", new Slot(array));
-            frame.getOperandStack().push(new Slot(nameObj));
+            nameObj.setField("value", "[C", UnionSlot.of(array));
+            frame.getOperandStack().pushRef(nameObj);
         });
         TinyJVM.vm.getHeap().registerMethod(
                 "java/lang/Class_forName0_(Ljava/lang/String;ZLjava/lang/ClassLoader;Ljava/lang/Class;)Ljava/lang/Class;",
                 frame -> {
-                    frame.getOperandStack().pop().getInstance();
-                    frame.getOperandStack().pop().getInstance();
-                    int init = frame.getOperandStack().pop().getInt();
-                    Instance name = frame.getOperandStack().pop().getInstance();
+                    frame.getOperandStack().popRef();
+                    frame.getOperandStack().popRef();
+                    int init = frame.getOperandStack().popInt();
+                    Instance name = frame.getOperandStack().popRef();
                     String clsName = RuntimeUtils.obj2Str(name).replace('.', '/');
                     Clazz clazz = TinyJVM.vm.getHeap().getClazz(clsName);
                     if (clazz == null)
@@ -95,7 +95,7 @@ public class JavaLangClass {
 
 
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_getComponentType_()Ljava/lang/Class;", frame -> {
-            Clazz cls = frame.getOperandStack().pop().getInstance().getMetaClass();
+            Clazz cls = frame.getOperandStack().popRef().getMetaClass();
             if (cls.getName().startsWith("[")) {
                 String name = cls.getName().substring(1);
                 //todo support another types
@@ -112,18 +112,18 @@ public class JavaLangClass {
 
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_getPrimitiveClass_(Ljava/lang/String;)Ljava/lang/Class;",
                 (frame) -> {
-                    final Instance instance = frame.getOperandStack().pop().getInstance();
+                    final Instance instance = frame.getOperandStack().popRef();
                     final String val = RuntimeUtils.obj2Str(instance);
                     Clazz cls = TinyJVM.vm.getHeap().getClazz(val);
                     frame.getOperandStack().push(new Slot(cls.getRuntimeClass()));
                 });
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_desiredAssertionStatus_()Z", frame -> {
-            Object xx = frame.getOperandStack().pop().getInstance();
+            Object xx = frame.getOperandStack().popRef();
             frame.getOperandStack().push(new Slot(1));
         });
 
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_getSimpleName_()Ljava/lang/String;", frame -> {
-            Clazz cls = frame.getOperandStack().pop().getInstance().getMetaClass();
+            Clazz cls = frame.getOperandStack().popRef().getMetaClass();
             int lidx = cls.getName().lastIndexOf("/");
             int idx = 0;
             if (lidx > 0) {
@@ -135,14 +135,14 @@ public class JavaLangClass {
         });
 
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_getCanonicalName_()Ljava/lang/String;", frame -> {
-            Clazz cls = frame.getOperandStack().pop().getInstance().getMetaClass();
+            Clazz cls = frame.getOperandStack().popRef().getMetaClass();
             String sn = cls.getName().replace('/', '.');
             Instance obj = RuntimeUtils.str2Obj(sn, frame.getMethod().getClazz().getClazzLoader());
             frame.getOperandStack().push(new Slot(obj));
         });
 
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_getInterfaces_()[Ljava/lang/Class;", frame -> {
-            Instance thisObj = frame.getOperandStack().pop().getInstance();
+            Instance thisObj = frame.getOperandStack().popRef();
             Clazz cls = (thisObj).getMetaClass();
             if (!cls.getInterfaceNames().isEmpty() && cls.getInterfaces().isEmpty()) {
                 frame.getOperandStack().push(new Slot(thisObj));
@@ -168,15 +168,15 @@ public class JavaLangClass {
         });
 
         TinyJVM.vm.getHeap().registerMethod("java/lang/Class_newInstance_()Ljava/lang/Object;", frame -> {
-            Clazz cls = frame.getOperandStack().pop().getInstance().getMetaClass();
+            Clazz cls = frame.getOperandStack().popRef().getMetaClass();
             Instance ins = cls.newInstance();
             frame.getOperandStack().push(new Slot(ins));
         });
 
 //        TinyJVM.vm.getHeap().registerMethod(
 //                "java/lang/Class_getDeclaredField_(Ljava/lang/String;)Ljava/lang/reflect/Field;", frame -> {
-//                    Instance nameObj = (Instance) frame.getOperandStack().pop().getInstance();
-//                    Instance thisObj = (Instance) frame.getOperandStack().pop().getInstance();
+//                    Instance nameObj = (Instance) frame.getOperandStack().popRef();
+//                    Instance thisObj = (Instance) frame.getOperandStack().popRef();
 //                    String name = RuntimeUtils.obj2Str(nameObj);
 //                    Field field = thisObj.getMetaClass().getField(name);
 //                    frame.getOperandStack().push(new Slot(field.));

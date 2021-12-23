@@ -26,6 +26,7 @@ public class InvokeStaticInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
+
         NativeMethod nm = TinyJVM.vm.getHeap().getMethod(RuntimeUtils.nativeMethodKey(clazzName, methodName, descriptor));
         if (nm != null) {
             nm.invoke(frame);
@@ -35,13 +36,17 @@ public class InvokeStaticInstruction extends Instruction {
         Clazz aClass = TinyJVM.vm.getHeap().getClazz(clazzName);
         if (aClass == null)
             aClass = frame.getMethod().getClazz().getClazzLoader().loadClazz(clazzName);
+
         RuntimeUtils.clinit(aClass);
 
         Method method = aClass.getMethod(methodName, descriptor);
 
-        if (method.isNative())
-            throw new IllegalStateException();
+        System.out.println(method);
 
+//        if (method.isNative())
+//            throw new IllegalStateException();
+
+//        if (!method.isNative())
         RuntimeUtils.invokeMethod(method);
     }
 

@@ -1,9 +1,8 @@
 package net.tdiant.tinyjvm.classes.instruction;
 
-import net.tdiant.tinyjvm.runtime.Field;
-import net.tdiant.tinyjvm.runtime.Frame;
-import net.tdiant.tinyjvm.runtime.Instance;
-import net.tdiant.tinyjvm.runtime.Slot;
+import net.tdiant.tinyjvm.runtime.*;
+
+import java.util.Objects;
 
 public class PutFieldInstruction extends Instruction {
 
@@ -24,18 +23,35 @@ public class PutFieldInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        Slot s;
+//        Slot s;
+//        if (fieldDescriptor.equals("J") || fieldDescriptor.equals("D")) {
+////            Slot low = frame.getOperandStack().pop();
+//            Slot high = frame.getOperandStack().pop();
+////            s = new Slot(high.getHigh());
+//            s = high;
+//        } else {
+//            s = new Slot(frame.getOperandStack().pop().getHigh());
+//        }
+//
+//        Instance self = frame.getOperandStack().popRef();
+//        Field field = self.getField(fieldName, fieldDescriptor);
+//        field.setVal(s);
+        if (Objects.equals("java/lang/Thread", clazz)
+                || Objects.equals("java/lang/ThreadGroup", clazz)) {
+            return;
+        }
+        UnionSlot us = null;
         if (fieldDescriptor.equals("J") || fieldDescriptor.equals("D")) {
-            Slot low = frame.getOperandStack().pop();
-            Slot high = frame.getOperandStack().pop();
-            s = new Slot(high.getHigh(), low.getHigh());
+            final Slot low = frame.getOperandStack().pop();
+            final Slot high = frame.getOperandStack().pop();
+            us = UnionSlot.of(high, low);
         } else {
-            s = new Slot(frame.getOperandStack().pop().getHigh());
+            us = UnionSlot.of(frame.getOperandStack().pop());
         }
 
-        Instance self = frame.getOperandStack().pop().getInstance();
+        final Instance self = frame.getOperandStack().popRef();
         Field field = self.getField(fieldName, fieldDescriptor);
-        field.setVal(s);
+        field.setVal(us);
     }
 
     @Override

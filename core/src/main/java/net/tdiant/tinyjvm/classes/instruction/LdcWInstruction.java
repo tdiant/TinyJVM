@@ -22,10 +22,10 @@ public class LdcWInstruction extends Instruction {
     public void run(Frame frame) {
         switch (descriptor) {
             case "I":
-                frame.getOperandStack().push(new Slot((int) val));
+                frame.getOperandStack().pushInt((int) val);
                 break;
             case "F":
-                frame.getOperandStack().push(new Slot((float) val));
+                frame.getOperandStack().pushFloat((float) val);
                 break;
             case "Ljava/lang/String":
                 Clazz klass = TinyJVM.vm.getHeap().getClazz("java/lang/String");
@@ -48,11 +48,11 @@ public class LdcWInstruction extends Instruction {
                     characters[i] = chars[i];
                 }
                 InstanceArrayInstance arr = new InstanceArrayInstance(arrClazz, characters);
-                field.setVal(new Slot(arr));
-                frame.getOperandStack().push(new Slot(object));
+                field.setVal(UnionSlot.of(arr));
+                frame.getOperandStack().pushRef(object);
                 break;
             default:
-                frame.getOperandStack().push(new Slot((Instance) val));
+                frame.getOperandStack().pushRef((Instance) val);
                 break;
         }
     }

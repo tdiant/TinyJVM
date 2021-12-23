@@ -1,6 +1,7 @@
 package net.tdiant.tinyjvm.classes.file;
 
 import net.tdiant.tinyjvm.classes.file.attr.Attribute;
+import net.tdiant.tinyjvm.classes.file.attr.CodeAttribute;
 import net.tdiant.tinyjvm.classes.file.attr.LineNumTableAttribute;
 
 import java.util.List;
@@ -26,10 +27,10 @@ public class MethodInfo {
         this.attributes = attributes;
     }
 
-    public Code getCode() {
+    public CodeAttribute getCode() {
         for (Attribute attribute : attributes) {
-            if (attribute instanceof Code) {
-                return ((Code) attribute);
+            if (attribute instanceof CodeAttribute) {
+                return ((CodeAttribute) attribute);
             }
         }
         return null;

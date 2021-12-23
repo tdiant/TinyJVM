@@ -263,4 +263,23 @@ public class Clazz extends BaseNametag {
         return field;
     }
 
+    @Override
+    public String toString() {
+        return "Clazz{" +
+                "name=" + this.getName() +
+                ", descriptor=" + this.getDescriptor() +
+                ", superClassName='" + superClassName + '\'' +
+                ", interfaceNames=" + interfaceNames +
+//                ", methods=" + methods +
+                ", fields=" + fields +
+                ", bootstrapMethods=" + bootstrapMethods +
+                ", constantPool=" + constantPool +
+                ", clazzLoader=" + clazzLoader +
+                ", clazzFile=" + clazzFile +
+                ", stat=" + stat +
+                ", superClass=" + superClass +
+                ", interfaces=" + interfaces +
+                ", runtimeClass=" + runtimeClass +
+                '}';
+    }
 }

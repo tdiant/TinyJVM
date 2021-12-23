@@ -6,7 +6,7 @@ import net.tdiant.tinyjvm.runtime.Slot;
 public class I2bInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
-        int x = frame.getOperandStack().pop().getInt();
+        int x = frame.getOperandStack().popInt();
         frame.getOperandStack().push(new Slot(x));
     }
 

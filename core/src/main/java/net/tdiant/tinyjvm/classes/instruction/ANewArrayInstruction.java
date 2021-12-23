@@ -22,7 +22,7 @@ public class ANewArrayInstruction extends Instruction {
         Clazz cls = frame.getMethod().getClazz().getClazzLoader().loadClazz(className);
         RuntimeUtils.clinit(cls);
 
-        int count = frame.getOperandStack().pop().getInt();
+        int count = frame.getOperandStack().popInt();
         String name = "[L" + cls.getName() + ";";
 
         Clazz clazz = TinyJVM.vm.getHeap().getClazz(name);

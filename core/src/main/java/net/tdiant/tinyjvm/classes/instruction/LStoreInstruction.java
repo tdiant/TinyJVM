@@ -1,7 +1,6 @@
 package net.tdiant.tinyjvm.classes.instruction;
 
 import net.tdiant.tinyjvm.runtime.Frame;
-import net.tdiant.tinyjvm.runtime.Slot;
 
 public class LStoreInstruction extends Instruction {
 
@@ -18,9 +17,9 @@ public class LStoreInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        frame.getLocalVars().set(idx, new Slot(
-                frame.getOperandStack().pop().getLong()
-        ));
+        frame.getLocalVars().setLong(idx,
+                frame.getOperandStack().popLong()
+        );
     }
 
     @Override

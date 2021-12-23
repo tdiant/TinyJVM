@@ -1,7 +1,6 @@
 package net.tdiant.tinyjvm.classes.instruction;
 
 import net.tdiant.tinyjvm.runtime.Frame;
-import net.tdiant.tinyjvm.runtime.Slot;
 
 public class DLoadInstruction extends Instruction {
 
@@ -22,9 +21,9 @@ public class DLoadInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        frame.getOperandStack().push(new Slot(
-                frame.getLocalVars().get(idx).getDouble()
-        ));
+        frame.getOperandStack().pushDouble(
+                frame.getLocalVars().getDouble(idx)
+        );
     }
 
     @Override

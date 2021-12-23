@@ -19,7 +19,7 @@ public class InstanceOfInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        Instance ins = frame.getOperandStack().pop().getInstance();
+        Instance ins = frame.getOperandStack().popRef();
         if (ins == null) {
             frame.getOperandStack().push(new Slot(0));
             return;

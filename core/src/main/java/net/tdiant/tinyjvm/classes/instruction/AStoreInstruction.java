@@ -19,7 +19,7 @@ public class AStoreInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
         frame.getLocalVars().set(idx, new Slot(
-                frame.getOperandStack().pop().getInstance()
+                frame.getOperandStack().popRef()
         ));
     }
 

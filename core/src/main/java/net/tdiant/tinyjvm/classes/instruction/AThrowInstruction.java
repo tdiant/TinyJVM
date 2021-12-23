@@ -10,12 +10,14 @@ public class AThrowInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
         Thread thread = frame.getThread();
-        Instance exc = frame.getOperandStack().pop().getInstance();
+        Instance exc = frame.getOperandStack().popRef();
         String name = exc.getClazz().getName();
 
         Integer handlerPc = frame.getMethod().getHandlerPc(frame.getPc(), name);
         while (handlerPc == null && !thread.empty()) {
             Frame ef = thread.pop();
+            if ( ef.getCurrentMethodFullName().contains("java/lang/Thread"))
+                return;
             String msg = ef.getCurrentMethodFullName() + "(" + ef.getMethod().getClazz().getClazzLoader().getSource().sourcePath() + ":" + ef.getCurrentLine() + ")";
             System.err.println(msg);
             if (thread.empty()) {
@@ -28,7 +30,10 @@ public class AThrowInstruction extends Instruction {
         // no exception handler ...
         if (handlerPc == null) {
             System.err.println(exc);
-            throw new RuntimeException("no exception handler");
+            if (!name.contains("java/lang/Thread"))
+                throw new RuntimeException("no exception handler");
+            else
+                return;
         }
 
         thread.now().getOperandStack().push(new Slot(exc));

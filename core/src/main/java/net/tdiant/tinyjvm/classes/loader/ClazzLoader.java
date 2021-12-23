@@ -1,8 +1,12 @@
 package net.tdiant.tinyjvm.classes.loader;
 
 import net.tdiant.tinyjvm.TinyJVM;
-import net.tdiant.tinyjvm.classes.file.*;
+import net.tdiant.tinyjvm.classes.file.ClazzFile;
+import net.tdiant.tinyjvm.classes.file.FieldInfo;
+import net.tdiant.tinyjvm.classes.file.InterfaceInfo;
+import net.tdiant.tinyjvm.classes.file.MethodInfo;
 import net.tdiant.tinyjvm.classes.file.attr.BootstrapMethodsAttribute;
+import net.tdiant.tinyjvm.classes.file.attr.CodeAttribute;
 import net.tdiant.tinyjvm.runtime.*;
 
 import java.util.ArrayList;
@@ -24,6 +28,10 @@ public class ClazzLoader {
     }
 
     public Clazz loadClazz(String name) {
+
+        if (name.contains("java/lang/Thread"))
+            return null;
+
         Clazz cls = TinyJVM.vm.getHeap().getClazz(name);
         if (cls != null)
             return cls;
@@ -89,7 +97,7 @@ public class ClazzLoader {
         int scIdx = clzFile.getSuperClass();
         String superClassName = null;
         if (scIdx != 0) {
-            superClassName=clzFile.getConstantPool().getClassName(scIdx);
+            superClassName = clzFile.getConstantPool().getClassName(scIdx);
 //            int nameIdx = ((ClassConstantInfo) clzFile.getConstantPool().get(scIdx)).getNameIndex();
 //            superClassName = ((Utf8ConstantInfo) clzFile.getConstantPool().get(nameIdx - 1)).str();
         }
@@ -107,7 +115,7 @@ public class ClazzLoader {
     }
 
     public Method map(MethodInfo cfMethodInfo) {
-        Code code = cfMethodInfo.getCode();
+        CodeAttribute code = cfMethodInfo.getCode();
         if (code == null) {
             return new Method(cfMethodInfo.getAccessFlags(), cfMethodInfo.getName(), cfMethodInfo.getDescriptor(), 0, 0,
                     null, null, cfMethodInfo.getLineNumber());

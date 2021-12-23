@@ -6,14 +6,14 @@ import net.tdiant.tinyjvm.runtime.Slot;
 public class LCmpInstruction extends Instruction {
     @Override
     public void run(Frame frame) {
-        long a = frame.getOperandStack().pop().getLong();
-        long b = frame.getOperandStack().pop().getLong();
+        long a = frame.getOperandStack().popLong();
+        long b = frame.getOperandStack().popLong();
         if (a > b) {
-            frame.getOperandStack().push(new Slot(-1));
+            frame.getOperandStack().pushInt(-1);
         } else if (a < b) {
-            frame.getOperandStack().push(new Slot(1));
+            frame.getOperandStack().pushInt(1);
         } else {
-            frame.getOperandStack().push(new Slot(0));
+            frame.getOperandStack().pushInt(0);
         }
     }
 

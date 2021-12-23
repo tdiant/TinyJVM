@@ -7,9 +7,9 @@ public class BAStoreInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        int num = frame.getOperandStack().pop().getInt();
-        int idx = frame.getOperandStack().pop().getInt();
-        PrimitiveArray arr = (PrimitiveArray) frame.getOperandStack().pop().getInstance();
+        int num = frame.getOperandStack().popInt();
+        int idx = frame.getOperandStack().popInt();
+        PrimitiveArray arr = (PrimitiveArray) frame.getOperandStack().popRef();
         arr.ints[idx] = num;
     }
 

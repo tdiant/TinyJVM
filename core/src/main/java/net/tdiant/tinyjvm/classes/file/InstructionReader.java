@@ -82,45 +82,45 @@ public class InstructionReader {
             case 0x19:
                 return new ALoadInstruction(s.readUnsignedByte());
             case 0x1a:
-                return new ILoadInstruction(0);
+                return new ILoadNInstruction(0);
             case 0x1b:
-                return new ILoadInstruction(1);
+                return new ILoadNInstruction(1);
             case 0x1c:
-                return new ILoadInstruction(2);
+                return new ILoadNInstruction(2);
             case 0x1d:
-                return new ILoadInstruction(3);
+                return new ILoadNInstruction(3);
             case 0x1e:
-                return new LLoadInstruction(0);
+                return new LLoadNInstruction(0);
             case 0x1f:
-                return new LLoadInstruction(1);
+                return new LLoadNInstruction(1);
             case 0x20:
-                return new LLoadInstruction(2);
+                return new LLoadNInstruction(2);
             case 0x21:
-                return new LLoadInstruction(3);
+                return new LLoadNInstruction(3);
             case 0x22:
-                return new FLoadInstruction(0);
+                return new FLoadNInstruction(0);
             case 0x23:
-                return new FLoadInstruction(1);
+                return new FLoadNInstruction(1);
             case 0x24:
-                return new FLoadInstruction(2);
+                return new FLoadNInstruction(2);
             case 0x25:
-                return new FLoadInstruction(3);
+                return new FLoadNInstruction(3);
             case 0x26:
-                return new DLoadInstruction(0);
+                return new DLoadNInstruction(0);
             case 0x27:
-                return new DLoadInstruction(1);
+                return new DLoadNInstruction(1);
             case 0x28:
-                return new DLoadInstruction(2);
+                return new DLoadNInstruction(2);
             case 0x29:
-                return new DLoadInstruction(3);
+                return new DLoadNInstruction(3);
             case 0x2a:
-                return new ALoadInstruction(0);
+                return new ALoadNInstruction(0);
             case 0x2b:
-                return new ALoadInstruction(1);
+                return new ALoadNInstruction(1);
             case 0x2c:
-                return new ALoadInstruction(2);
+                return new ALoadNInstruction(2);
             case 0x2d:
-                return new ALoadInstruction(3);
+                return new ALoadNInstruction(3);
             case 0x2e:
                 return new IALoadInstruction();
             case 0x2f:
@@ -148,45 +148,45 @@ public class InstructionReader {
             case 0x3a:
                 return new AStoreInstruction(s.readUnsignedByte());
             case 0x3b:
-                return new IStoreInstruction(0);
+                return new IStoreNInstruction(0);
             case 0x3c:
-                return new IStoreInstruction(1);
+                return new IStoreNInstruction(1);
             case 0x3d:
-                return new IStoreInstruction(2);
+                return new IStoreNInstruction(2);
             case 0x3e:
-                return new IStoreInstruction(3);
+                return new IStoreNInstruction(3);
             case 0x3f:
-                return new LStoreInstruction(0);
+                return new LStoreNInstruction(0);
             case 0x40:
-                return new LStoreInstruction(1);
+                return new LStoreNInstruction(1);
             case 0x41:
-                return new LStoreInstruction(2);
+                return new LStoreNInstruction(2);
             case 0x42:
-                return new LStoreInstruction(3);
+                return new LStoreNInstruction(3);
             case 0x43:
-                return new FStoreInstruction(0);
+                return new FStoreNInstruction(0);
             case 0x44:
-                return new FStoreInstruction(1);
+                return new FStoreNInstruction(1);
             case 0x45:
-                return new FStoreInstruction(2);
+                return new FStoreNInstruction(2);
             case 0x46:
-                return new FStoreInstruction(3);
+                return new FStoreNInstruction(3);
             case 0x47:
-                return new DStoreInstruction(0);
+                return new DStoreNInstruction(0);
             case 0x48:
-                return new DStoreInstruction(1);
+                return new DStoreNInstruction(1);
             case 0x49:
-                return new DStoreInstruction(2);
+                return new DStoreNInstruction(2);
             case 0x4a:
-                return new DStoreInstruction(3);
+                return new DStoreNInstruction(3);
             case 0x4b:
-                return new AStoreInstruction(0);
+                return new AStoreNInstruction(0);
             case 0x4c:
-                return new AStoreInstruction(1);
+                return new AStoreNInstruction(1);
             case 0x4d:
-                return new AStoreInstruction(2);
+                return new AStoreNInstruction(2);
             case 0x4e:
-                return new AStoreInstruction(3);
+                return new AStoreNInstruction(3);
             case 0x4f:
                 return new IAStoreInstruction();
             case 0x50:
@@ -370,12 +370,16 @@ public class InstructionReader {
             case 0xab:
                 return readLookupSwitch();
             case 0xac:
-            case 0xae:
-            case 0xb0:
                 return new IReturnInstruction();
             case 0xad:
-            case 0xaf:
                 return new LReturnInstruction();
+            case 0xae:
+                return new FReturnInstruction();
+            case 0xaf:
+                return new DReturnInstruction();
+
+            case 0xb0:
+                return new AReturnInstruction();
             case 0xb1:
                 return new ReturnInstruction();
 //            case 0xb2:
@@ -508,10 +512,9 @@ public class InstructionReader {
                 return new GotoWInstruction(s.readInt());
 
             case 0xc0:
-                return new TodoInstruction("checkcast", Arrays.asList(
+                return new TodoInstruction("checkcast",3, Arrays.asList(
                         s.readUnsignedShort()
                 ));
-
             case 0xa8:
             case 0xa9:
             case 0xc5:
@@ -524,16 +527,35 @@ public class InstructionReader {
     }
 
     private TableSwitchInstruction readTableSwitch() throws IOException {
-        int a = s.readInt();
-        int def = s.readInt();
-        int low = s.readInt(), high = s.readInt();
-        Map<Integer, Integer> mp = new HashMap<>();
-        for (int i = low; i <= high; i++)
-            mp.put(i, s.readInt());
-        return new TableSwitchInstruction(
-                1 + a + (high - low + 1) * 4,
-                def, high, low, mp
-        );
+//        int a = s.readInt();
+//        int def = s.readInt();
+//        int low = s.readInt(), high = s.readInt();
+//        Map<Integer, Integer> mp = new HashMap<>();
+//        for (int i = low; i <= high; i++)
+//            mp.put(i, s.readInt());
+//        return new TableSwitchInstruction(
+//                1 + a + (high - low + 1) * 4,
+//                def, high, low, mp
+//        );
+
+        int offset = 1;
+
+        int padding = s.readPadding();
+        offset += padding;
+
+        int tsDefault = s.readInt();
+        int tsLow = s.readInt();
+        int tsHigh = s.readInt();
+        offset += 12;
+
+        int tsOffsetByteLength = (tsHigh - tsLow + 1) * 4;
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i = tsLow; i <= tsHigh; i++) {
+            map.put(i, s.readInt());
+        }
+        offset += tsOffsetByteLength;
+
+        return new TableSwitchInstruction(offset, tsDefault, tsLow, tsHigh, map);
     }
 
     private LdcInstruction readLdc() throws IOException {

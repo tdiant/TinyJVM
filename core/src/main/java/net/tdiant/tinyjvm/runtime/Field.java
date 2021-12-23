@@ -1,17 +1,19 @@
 package net.tdiant.tinyjvm.runtime;
 
+import java.util.HashMap;
+
 /**
  * 类字段
  */
 public class Field extends BaseNametag {
 
-    private Slot val;
+    private UnionSlot val;
 
     public Field(int accessFlags, String name, String descriptor) {
         super(accessFlags, name, descriptor);
     }
 
-    public Field(int accessFlags, String name, String descriptor, Slot val) {
+    public Field(int accessFlags, String name, String descriptor, UnionSlot val) {
         this(accessFlags, name, descriptor);
         this.val = val;
     }
@@ -33,20 +35,20 @@ public class Field extends BaseNametag {
             case "B":
             case "S":
             case "I":
-                val = new Slot(0);
+                val = UnionSlot.of(0);
                 break;
             case "L":
             case "J":
-                val = new Slot(0L);
+                val = UnionSlot.of(0L);
                 break;
             case "F":
-                val = new Slot(0F);
+                val = UnionSlot.of(0F);
                 break;
             case "D":
-                val = new Slot(0.0);
+                val = UnionSlot.of(0.0);
                 break;
             default:
-                val = new Slot((Instance) null);
+                val = UnionSlot.of((Instance) null);
                 break;
         }
     }
@@ -61,20 +63,20 @@ public class Field extends BaseNametag {
             case "B":
             case "S":
             case "I":
-                frame.getOperandStack().push(new Slot(val.getInt()));
+                frame.getOperandStack().pushInt(val.getInt());
                 break;
             case "L":
             case "J":
-                frame.getOperandStack().push(new Slot(val.getLong()));
+                frame.getOperandStack().pushLong(val.getLong());
                 break;
             case "F":
-                frame.getOperandStack().push(new Slot(val.getFloat()));
+                frame.getOperandStack().pushFloat(val.getFloat());
                 break;
             case "D":
-                frame.getOperandStack().push(new Slot(val.getDouble()));
+                frame.getOperandStack().pushDouble(val.getDouble());
                 break;
             default:
-                frame.getOperandStack().push(new Slot(val.getInstance()));
+                frame.getOperandStack().pushRef(val.getRef());
                 break;
         }
     }
@@ -89,29 +91,29 @@ public class Field extends BaseNametag {
             case "B":
             case "S":
             case "I":
-                val.set(frame.getOperandStack().pop().getInt());
+                val.setInt(frame.getOperandStack().popInt());
                 break;
             case "L":
             case "J":
-                val.set(frame.getOperandStack().pop().getLong());
+                val.setLong(frame.getOperandStack().popLong());
                 break;
             case "F":
-                val.set(frame.getOperandStack().pop().getFloat());
+                val.setFloat(frame.getOperandStack().popFloat());
                 break;
             case "D":
-                val.set(frame.getOperandStack().pop().getDouble());
+                val.setDouble(frame.getOperandStack().popDouble());
                 break;
             default:
-                val.set(frame.getOperandStack().pop().getInstance());
+                val.setRef(frame.getOperandStack().popRef());
                 break;
         }
     }
 
-    public Slot getVal() {
+    public UnionSlot getVal() {
         return val;
     }
 
-    public void setVal(Slot val) {
+    public void setVal(UnionSlot val) {
         this.val = val;
     }
 

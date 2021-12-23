@@ -22,15 +22,17 @@ public class Method extends BaseNametag {
     private Clazz clazz;
 
     public Method(int accessFlags, String name, String descriptor, int maxStacks, int maxLocals, Map<Integer, Instruction> instructions, List<ExceptionInfo> exceptionInfos, LineNumTableAttribute lineNumAttr) {
+
         super(accessFlags, name, descriptor);
+
         this.maxStacks = maxStacks;
         this.maxLocals = maxLocals;
         this.instructions = instructions == null ? new HashMap<>() : instructions;
         this.exceptionInfos = exceptionInfos == null ? new ArrayList<>() : exceptionInfos;
         this.lineNumAttr = lineNumAttr == null ? new LineNumTableAttribute(new LineNumTableAttribute.Line[]{}) : lineNumAttr;
 
-        if (this.instructions.size()<=0) {
-            this.instructions.put(0,new ReturnInstruction());
+        if (this.instructions.size() <= 0) {
+            this.instructions.put(0, new ReturnInstruction());
         }
     }
 

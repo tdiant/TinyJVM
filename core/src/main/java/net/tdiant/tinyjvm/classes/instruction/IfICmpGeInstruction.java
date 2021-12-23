@@ -17,8 +17,8 @@ public class IfICmpGeInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        int a = frame.getOperandStack().pop().getInt();
-        int b = frame.getOperandStack().pop().getInt();
+        int a = frame.getOperandStack().popInt();
+        int b = frame.getOperandStack().popInt();
         if (b >= a) {
             frame.setNextPc(frame.getPc() + idx);
         }

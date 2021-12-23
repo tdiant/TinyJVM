@@ -24,6 +24,9 @@ public class Thread {
             throw new StackOverflowError();
         }
         Frame frame = frames[--top];
+        if (frame.getOnPop() != null) {
+            frame.getOnPop().run();
+        }
         frames[top] = null;
         return frame;
     }
@@ -43,4 +46,5 @@ public class Thread {
     public boolean empty() {
         return top <= 0;
     }
+
 }

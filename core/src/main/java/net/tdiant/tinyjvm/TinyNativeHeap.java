@@ -41,6 +41,10 @@ public class TinyNativeHeap {
         return new HashSet<>(nativeMethods.values());
     }
 
+    public Set<String> getNativeMethodNames() {
+        return nativeMethods.keySet();
+    }
+
     public Set<Clazz> getClasses() {
         return new HashSet<>(classesMap.values());
     }

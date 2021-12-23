@@ -23,6 +23,8 @@ public class Frame {
 
     private int stat;
 
+    public Runnable onPop;
+
     public Frame(Method method) {
         this.method = method;
         this.localVars = new LocalVariableTable(method.getMaxLocals());
@@ -41,7 +43,7 @@ public class Frame {
     }
 
     public Instance getThis(int size) {
-        return this.operandStack.get(this.operandStack.getCount() - size).getInstance();
+        return this.operandStack.get(this.operandStack.getCount() - size).getRef();
     }
 
     public Method getMethod() {
@@ -96,4 +98,18 @@ public class Frame {
         return this.method.getLine(this.pc);
     }
 
+    public void setOnPop(Runnable o) {
+        this.onPop = o;
+    }
+
+    public Runnable getOnPop() {
+        return onPop;
+    }
+
+    @Override
+    public String toString() {
+        return "Frame{" +
+                "method=" + method +
+                '}';
+    }
 }

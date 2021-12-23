@@ -31,7 +31,7 @@ public class TableSwitchInstruction extends Instruction {
         frame.setNextPc(
                 frame.getPc() + (
                         map.getOrDefault(
-                                frame.getOperandStack().pop().getInt(),
+                                frame.getOperandStack().popInt(),
                                 def
                         )
                 ));

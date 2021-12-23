@@ -17,7 +17,7 @@ public class BiPushInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        frame.getOperandStack().push(new Slot(num));
+        frame.getOperandStack().pushInt(num);
     }
 
     @Override

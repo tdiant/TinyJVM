@@ -20,7 +20,7 @@ public class IIncInstruction extends Instruction {
 
     @Override
     public void run(Frame frame) {
-        int x = frame.getLocalVars().get(idx).getInt();
+        int x = frame.getLocalVars().getInt(idx);
         frame.getLocalVars().set(idx, new Slot(x + num));
     }
 

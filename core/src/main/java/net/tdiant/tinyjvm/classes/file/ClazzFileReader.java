@@ -232,7 +232,6 @@ public class ClazzFileReader {
 
             List<Attribute> attrs = readAttributes(attributesCount, pool);
 
-
             infos.add(new MethodInfo(
                     accessFlag,
                     name,
@@ -277,7 +276,7 @@ public class ClazzFileReader {
                     List<Instruction> instructions = readCodeByByte(codeBytes, pool);
 
                     int exTableLength = in.readUnsignedShort(); //异常数量
-                    ExceptionInfo[] exceptionInfos = new ExceptionInfo[exTableLength + 10];
+                    ExceptionInfo[] exceptionInfos = new ExceptionInfo[exTableLength];
                     for (int j = 0; j < exTableLength; j++) {
                         int etsp = in.readUnsignedShort();
                         int etep = in.readUnsignedShort();
@@ -295,7 +294,7 @@ public class ClazzFileReader {
                     int attrCnt = in.readUnsignedShort();
                     List<Attribute> attrs = readAttributes(attrCnt, pool);
 
-                    attr = new CodeAttribute(maxStackSize, maxLocals, instructions, exceptionInfos, attrs);
+                    attr = new CodeAttribute(maxStackSize, maxLocals, instructions, Arrays.asList(exceptionInfos), attrs);
 
                     break;
                 case Attribute.LineNumberTable:
